@@ -21,16 +21,45 @@ export interface ResearchSessionResponse extends ResearchSessionSummary {
   executive_verdict?: string
 }
 
+export interface SourceChunkItem {
+  id: string
+  chunk_index: number
+  text_content: string
+  page_number?: number
+  start_char?: number
+  end_char?: number
+  token_count: number
+}
+
 export interface SourceItem {
   id: string
   session_id: string
   source_type: "pdf" | "url" | "text"
   title: string
   uri?: string
+  domain?: string
   publication_date?: string
+  last_modified_date?: string
+  extraction_timestamp?: string
   author_or_publisher?: string
+  processing_status?: "pending" | "processing" | "processed" | "failed"
+  error_details?: string
+  content_hash?: string
+  word_count?: number
+  char_count?: number
   chunk_count: number
   created_at: string
+  cleaned_content?: string
+  raw_content?: string
+  metadata_json?: string
+  chunks?: SourceChunkItem[]
+}
+
+export interface BatchIngestionResponse {
+  sources: SourceItem[]
+  total_submitted: number
+  total_successful: number
+  total_failed: number
 }
 
 export interface RequirementItem {

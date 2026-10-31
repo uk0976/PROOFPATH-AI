@@ -518,9 +518,12 @@ class PipelineOrchestrator:
 
     async def _stage_3_source_collection(self) -> List[Source]:
         """Stage 3: Gathers and validates all attached sources."""
-        sources = self.db.query(Source).filter(Source.session_id == self.session_id).all()
+        sources = self.db.query(Source).filter(
+            Source.session_id == self.session_id,
+            Source.processing_status != "failed"
+        ).all()
         if not sources:
-            raise ValueError("No sources found for this session. Please attach at least one source document or URL.")
+            raise ValueError("No accessible sources found for this session. Please attach at least one valid source document or URL.")
         return sources
 
     async def _stage_4_source_extraction(self, sources: List[Source]) -> List[DocumentChunk]:

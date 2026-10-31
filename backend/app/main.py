@@ -35,9 +35,30 @@ def ensure_database_schema(eng):
             for col_name, col_type in new_cols:
                 if col_name not in cols:
                     cursor.execute(f"ALTER TABLE requirements ADD COLUMN {col_name} {col_type}")
+
+            # Check and update sources table
+            cursor.execute("PRAGMA table_info(sources)")
+            source_cols = {row[1] for row in cursor.fetchall()}
+            source_new_cols = [
+                ("domain", "VARCHAR(255)"),
+                ("last_modified_date", "DATETIME"),
+                ("extraction_timestamp", "DATETIME"),
+                ("processing_status", "VARCHAR(50) DEFAULT 'processed'"),
+                ("error_details", "TEXT"),
+                ("content_hash", "VARCHAR(64)"),
+                ("word_count", "INTEGER DEFAULT 0"),
+                ("char_count", "INTEGER DEFAULT 0"),
+            ]
+            for col_name, col_type in source_new_cols:
+                if col_name not in source_cols:
+                    cursor.execute(f"ALTER TABLE sources ADD COLUMN {col_name} {col_type}")
+
             conn.connection.commit()
     except Exception as e:
         logger.warning(f"Schema migration check: {e}")
+
+# Run schema migrations on import
+ensure_database_schema(engine)
 
 
 @asynccontextmanager
