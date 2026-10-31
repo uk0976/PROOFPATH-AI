@@ -712,13 +712,20 @@ class PipelineOrchestrator:
             .filter(Requirement.session_id == self.session_id)
             .all()
         )
+        blindspots = (
+            self.db.query(BlindSpot)
+            .filter(BlindSpot.session_id == self.session_id)
+            .all()
+        )
         return GraphBuilder.build_evidence_graph(
             session_title=session.title,
             research_goal=session.research_goal,
             requirements=reqs,
             sources=sources,
             evidence_links=links,
-            contradictions=conflicts
+            contradictions=conflicts,
+            blindspots=blindspots,
+            session=session
         )
 
     async def _stage_14_decision_readiness_calculation(

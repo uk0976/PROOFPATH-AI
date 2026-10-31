@@ -10,6 +10,7 @@ from app.models import (
     AtomicClaim,
     EvidenceLink,
     Contradiction,
+    BlindSpot,
 )
 from app.schemas.evidence import (
     AtomicClaimResponse,
@@ -101,6 +102,7 @@ def get_research_evidence_graph(research_id: str, db: Session = Depends(get_db))
     sources = db.query(Source).filter(Source.session_id == research_id).all()
     links = db.query(EvidenceLink).join(Requirement).filter(Requirement.session_id == research_id).all()
     conflicts = db.query(Contradiction).filter(Contradiction.session_id == research_id).all()
+    blindspots = db.query(BlindSpot).filter(BlindSpot.session_id == research_id).all()
 
     return GraphBuilder.build_evidence_graph(
         session_title=session.title,
@@ -108,7 +110,9 @@ def get_research_evidence_graph(research_id: str, db: Session = Depends(get_db))
         requirements=reqs,
         sources=sources,
         evidence_links=links,
-        contradictions=conflicts
+        contradictions=conflicts,
+        blindspots=blindspots,
+        session=session
     )
 
 

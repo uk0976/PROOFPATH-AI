@@ -33,12 +33,13 @@ class EvidenceLinkResponse(BaseModel):
 # React Flow Node & Edge Schemas
 class FlowNodeData(BaseModel):
     label: str
-    node_type: str  # goal, requirement, claim, source, contradiction
+    node_type: str  # goal, requirement, claim, evidence, source, gap, contradiction, blindspot
     status: Optional[str] = None
     severity: Optional[str] = None
     quote: Optional[str] = None
     source_name: Optional[str] = None
     page: Optional[int] = None
+    url: Optional[str] = None
     meta: Optional[Dict[str, Any]] = None
 
 

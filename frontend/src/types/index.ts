@@ -120,12 +120,13 @@ export interface BlindSpotItem {
 
 export interface FlowNodeData {
   label: string
-  node_type: "goal" | "requirement" | "claim" | "source"
+  node_type: "goal" | "requirement" | "claim" | "source" | "evidence" | "gap" | "contradiction" | "blindspot"
   status?: string
   severity?: string
   quote?: string
   source_name?: string
   page?: number
+  url?: string
   meta?: Record<string, any>
 }
 
