@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from sqlalchemy.orm import Session
 from app.models import (
     ResearchSession,
@@ -43,7 +43,7 @@ Automated multi-AZ regional redundancy provides 99.99% availability out of the b
         source_type="pdf",
         title="AWS Serverless Architecture Guide 2024.pdf",
         uri="AWS_Serverless_Guide_2024.pdf",
-        publication_date=datetime.utcnow() - timedelta(days=90),
+        publication_date=datetime.now(timezone.utc) - timedelta(days=90),
         author_or_publisher="AWS Enterprise Architecture",
         raw_content=s1_text,
         cleaned_content=s1_text,
@@ -60,7 +60,7 @@ Cold starts still impacted 1.8% of invocations during sudden traffic surges."""
         source_type="url",
         title="HighScale Benchmark: Serverless vs Kubernetes 2024",
         uri="https://benchmark.tech/serverless-vs-k8s-2024",
-        publication_date=datetime.utcnow() - timedelta(days=60),
+        publication_date=datetime.now(timezone.utc) - timedelta(days=60),
         author_or_publisher="HighScale Engineering",
         raw_content=s2_text,
         cleaned_content=s2_text,
@@ -76,7 +76,7 @@ Dynamic IP pooling without static egress proxies is strictly prohibited by banki
         source_type="text",
         title="Enterprise Banking Compliance Policy",
         uri="Internal Document",
-        publication_date=datetime.utcnow() - timedelta(days=400),
+        publication_date=datetime.now(timezone.utc) - timedelta(days=400),
         author_or_publisher="Information Security Office",
         raw_content=s3_text,
         cleaned_content=s3_text,

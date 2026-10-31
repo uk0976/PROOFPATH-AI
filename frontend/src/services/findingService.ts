@@ -9,9 +9,24 @@ import {
   MatrixViewData,
 } from "@/types"
 
+export interface FindingsOverview {
+  research_id: string
+  total_conflicts: number
+  total_gaps: number
+  total_temporal_flags: number
+  contradictions: ContradictionItem[]
+  information_gaps: InformationGapItem[]
+  temporal_audit: TemporalAuditItem[]
+}
+
 export const findingService = {
   async getRequirements(sessionId: string): Promise<RequirementItem[]> {
-    const res = await apiClient.get<RequirementItem[]>(`/requirements/${sessionId}`)
+    const res = await apiClient.get<RequirementItem[]>(`/research/${sessionId}/requirements`)
+    return res.data
+  },
+
+  async getAllFindings(sessionId: string): Promise<FindingsOverview> {
+    const res = await apiClient.get<FindingsOverview>(`/research/${sessionId}/findings`)
     return res.data
   },
 
@@ -31,17 +46,17 @@ export const findingService = {
   },
 
   async getClaims(sessionId: string): Promise<AtomicClaimItem[]> {
-    const res = await apiClient.get<AtomicClaimItem[]>(`/evidence/${sessionId}/claims`)
+    const res = await apiClient.get<AtomicClaimItem[]>(`/research/${sessionId}/claims`)
     return res.data
   },
 
   async getMatrix(sessionId: string): Promise<MatrixViewData> {
-    const res = await apiClient.get<MatrixViewData>(`/evidence/${sessionId}/matrix`)
+    const res = await apiClient.get<MatrixViewData>(`/research/${sessionId}/evidence`)
     return res.data
   },
 
   async getEvidenceGraph(sessionId: string): Promise<EvidenceGraphData> {
-    const res = await apiClient.get<EvidenceGraphData>(`/evidence/${sessionId}/graph`)
+    const res = await apiClient.get<EvidenceGraphData>(`/research/${sessionId}/graph`)
     return res.data
   },
 }

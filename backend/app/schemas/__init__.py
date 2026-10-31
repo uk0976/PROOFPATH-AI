@@ -5,8 +5,8 @@ from app.schemas.research import (
     ResearchSessionResponse,
 )
 from app.schemas.sources import (
-    URLSourceCreate,
-    TextSourceCreate,
+    SourceUrlRequest,
+    SourceTextRequest,
     SourceResponse,
     SourceDetailResponse,
     DocumentChunkResponse,
@@ -16,6 +16,9 @@ from app.schemas.requirements import (
     RequirementUpdate,
     DecomposeRequest,
     RequirementResponse,
+)
+from app.schemas.claims import (
+    ClaimResponse,
 )
 from app.schemas.findings import (
     ContradictionResponse,
@@ -35,7 +38,13 @@ from app.schemas.blindspots import (
     BlindSpotResponse,
     BlindSpotToggleResponse,
 )
+from app.schemas.verification import (
+    VerificationTaskResponse,
+    VerificationTaskPatchRequest,
+)
 from app.schemas.reports import (
+    ReportGenerateRequest,
+    ReportGenerateResponse,
     ExecutiveSummaryReport,
 )
 
@@ -44,8 +53,8 @@ __all__ = [
     "ResearchSessionUpdate",
     "ResearchSessionSummary",
     "ResearchSessionResponse",
-    "URLSourceCreate",
-    "TextSourceCreate",
+    "SourceUrlRequest",
+    "SourceTextRequest",
     "SourceResponse",
     "SourceDetailResponse",
     "DocumentChunkResponse",
@@ -53,6 +62,7 @@ __all__ = [
     "RequirementUpdate",
     "DecomposeRequest",
     "RequirementResponse",
+    "ClaimResponse",
     "ContradictionResponse",
     "InformationGapResponse",
     "TemporalDecayResponse",
@@ -65,5 +75,9 @@ __all__ = [
     "FlowEdge",
     "BlindSpotResponse",
     "BlindSpotToggleResponse",
+    "VerificationTaskResponse",
+    "VerificationTaskPatchRequest",
+    "ReportGenerateRequest",
+    "ReportGenerateResponse",
     "ExecutiveSummaryReport",
 ]

@@ -1,5 +1,5 @@
 from typing import Dict, Any, List
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class ReportGenerator:
@@ -11,7 +11,7 @@ class ReportGenerator:
         conflicts: List[Any],
         blindspots: List[Any]
     ) -> str:
-        date_str = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
+        date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
         lines = [
             f"# PROOFPATH AI — FORENSIC INVESTIGATION REPORT",
             f"> *\"Know what's missing before you decide.\"*",

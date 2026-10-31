@@ -15,9 +15,10 @@ from app.schemas.research import (
 )
 from app.services.pipeline_orchestrator import PipelineOrchestrator
 from app.services.event_stream import sse_manager
+from app.core.exceptions import NotFoundError, AppException
 
-logger = logging.getLogger(__name__)
-router = APIRouter(prefix="/research", tags=["Research Sessions"])
+logger = logging.getLogger("proofpath.research")
+router = APIRouter(tags=["Research"])
 
 
 async def run_pipeline_task(session_id: str):
@@ -31,8 +32,8 @@ async def run_pipeline_task(session_id: str):
         db.close()
 
 
-@router.post("/", response_model=ResearchSessionResponse, status_code=status.HTTP_201_CREATED)
-def create_session(data: ResearchSessionCreate, db: Session = Depends(get_db)):
+@router.post("/research", response_model=ResearchSessionResponse, status_code=status.HTTP_201_CREATED)
+def create_research(data: ResearchSessionCreate, db: Session = Depends(get_db)):
     session = ResearchSession(
         title=data.title,
         research_goal=data.research_goal,
@@ -45,8 +46,8 @@ def create_session(data: ResearchSessionCreate, db: Session = Depends(get_db)):
     return session
 
 
-@router.get("/", response_model=List[ResearchSessionSummary])
-def list_sessions(db: Session = Depends(get_db)):
+@router.get("/research", response_model=List[ResearchSessionSummary])
+def list_research(db: Session = Depends(get_db)):
     sessions = db.query(ResearchSession).order_by(ResearchSession.created_at.desc()).all()
     results = []
     for s in sessions:
@@ -72,52 +73,66 @@ def list_sessions(db: Session = Depends(get_db)):
     return results
 
 
-@router.get("/{session_id}", response_model=ResearchSessionResponse)
-def get_session(session_id: str, db: Session = Depends(get_db)):
-    session = db.query(ResearchSession).filter(ResearchSession.id == session_id).first()
+@router.get("/research/{research_id}", response_model=ResearchSessionResponse)
+def get_research(research_id: str, db: Session = Depends(get_db)):
+    session = db.query(ResearchSession).filter(ResearchSession.id == research_id).first()
     if not session:
-        raise HTTPException(status_code=404, detail="Research session not found")
+        raise NotFoundError("ResearchSession", research_id)
     return session
 
 
-@router.post("/{session_id}/start", status_code=status.HTTP_202_ACCEPTED)
-async def start_investigation(
-    session_id: str,
+@router.delete("/research/{research_id}", status_code=status.HTTP_200_OK)
+def delete_research(research_id: str, db: Session = Depends(get_db)):
+    session = db.query(ResearchSession).filter(ResearchSession.id == research_id).first()
+    if not session:
+        raise NotFoundError("ResearchSession", research_id)
+    db.delete(session)
+    db.commit()
+    return {"success": True, "message": f"Research session '{research_id}' successfully deleted."}
+
+
+@router.post("/research/{research_id}/start", status_code=status.HTTP_202_ACCEPTED)
+async def start_research(
+    research_id: str,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db)
 ):
-    session = db.query(ResearchSession).filter(ResearchSession.id == session_id).first()
+    session = db.query(ResearchSession).filter(ResearchSession.id == research_id).first()
     if not session:
-        raise HTTPException(status_code=404, detail="Research session not found")
+        raise NotFoundError("ResearchSession", research_id)
 
-    sources_count = db.query(Source).filter(Source.session_id == session_id).count()
+    sources_count = db.query(Source).filter(Source.session_id == research_id).count()
     if sources_count == 0:
-        raise HTTPException(status_code=400, detail="Cannot start investigation: Add at least one source document first.")
+        raise AppException("Cannot start investigation: Please attach at least one source document first.", status_code=400, code="NO_SOURCES")
 
     session.status = "processing"
     db.commit()
 
-    # Launch background task
-    background_tasks.add_task(run_pipeline_task, session_id=session_id)
+    background_tasks.add_task(run_pipeline_task, session_id=research_id)
 
     return {
-        "session_id": session_id,
+        "success": True,
+        "research_id": research_id,
         "status": "processing",
-        "stream_url": f"/api/v1/research/{session_id}/events"
+        "progress_stream_url": f"/api/v1/research/{research_id}/progress"
     }
 
 
-@router.get("/{session_id}/events")
-async def stream_investigation_events(session_id: str):
-    queue = sse_manager.subscribe(session_id)
+@router.get("/research/{research_id}/progress")
+async def get_research_progress(research_id: str, db: Session = Depends(get_db)):
+    session = db.query(ResearchSession).filter(ResearchSession.id == research_id).first()
+    if not session:
+        raise NotFoundError("ResearchSession", research_id)
+
+    # SSE Event Stream
+    queue = sse_manager.subscribe(research_id)
 
     async def event_generator():
         try:
-            # Yield initial keepalive
             yield f": keepalive\n\n"
             while True:
                 try:
-                    event_type, payload = await asyncio.wait_for(queue.get(), timeout=30.0)
+                    event_type, payload = await asyncio.wait_for(queue.get(), timeout=25.0)
                     yield f"event: {event_type}\ndata: {json.dumps(payload)}\n\n"
                     if payload.get("stage") in ["COMPLETE", "ERROR"]:
                         break
@@ -126,7 +141,7 @@ async def stream_investigation_events(session_id: str):
         except asyncio.CancelledError:
             pass
         finally:
-            sse_manager.unsubscribe(session_id, queue)
+            sse_manager.unsubscribe(research_id, queue)
 
     return StreamingResponse(
         event_generator(),

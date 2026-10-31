@@ -1,11 +1,11 @@
 from typing import List, Dict, Any
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class TemporalAnalyzerAgent:
     @staticmethod
     def audit_temporal_freshness(sources: List[Any], claims: List[Any]) -> List[Dict[str, Any]]:
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         results = []
 
         for s in sources:
@@ -15,6 +15,9 @@ class TemporalAnalyzerAgent:
             warning = None
 
             if pub_date:
+                # Ensure timezone-aware comparison
+                if pub_date.tzinfo is None:
+                    pub_date = pub_date.replace(tzinfo=timezone.utc)
                 age_months = round((now - pub_date).days / 30.0, 1)
                 if age_months > 24:
                     status = "outdated"
@@ -27,7 +30,6 @@ class TemporalAnalyzerAgent:
             else:
                 warning = "No explicit publication timestamp detected. Source recency cannot be guaranteed."
 
-            # Find claims citing past dates
             source_claims = [c for c in claims if getattr(c, "source_id", "") == s.id or (hasattr(c, "chunk") and c.chunk and c.chunk.source_id == s.id)]
             stale_claims = []
             for sc in source_claims:

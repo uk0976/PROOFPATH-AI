@@ -7,6 +7,8 @@ from app.models.claim import AtomicClaim
 from app.models.evidence import EvidenceLink
 from app.models.contradiction import Contradiction
 from app.models.blindspot import BlindSpot
+from app.models.verification_task import VerificationTask
+from app.models.report import ReportDossier
 from app.models.audit_log import AuditLog
 
 __all__ = [
@@ -19,5 +21,7 @@ __all__ = [
     "EvidenceLink",
     "Contradiction",
     "BlindSpot",
+    "VerificationTask",
+    "ReportDossier",
     "AuditLog",
 ]

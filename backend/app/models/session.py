@@ -26,4 +26,6 @@ class ResearchSession(BaseModel):
     requirements = relationship("Requirement", back_populates="session", cascade="all, delete-orphan")
     contradictions = relationship("Contradiction", back_populates="session", cascade="all, delete-orphan")
     blindspots = relationship("BlindSpot", back_populates="session", cascade="all, delete-orphan")
+    verification_tasks = relationship("VerificationTask", back_populates="session", cascade="all, delete-orphan")
+    reports = relationship("ReportDossier", back_populates="session", cascade="all, delete-orphan")
     audit_logs = relationship("AuditLog", back_populates="session", cascade="all, delete-orphan")

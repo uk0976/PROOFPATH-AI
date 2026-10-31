@@ -1,5 +1,5 @@
 from typing import List, Dict, Any, Tuple
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class DecisionReadinessScorer:
@@ -42,11 +42,14 @@ class DecisionReadinessScorer:
         if total_sources == 0:
             freshness_score = 50.0
         else:
-            now = datetime.utcnow()
+            now = datetime.now(timezone.utc)
             source_scores = []
             for s in sources:
                 if s.publication_date:
-                    age_months = (now - s.publication_date).days / 30.0
+                    pub = s.publication_date
+                    if pub.tzinfo is None:
+                        pub = pub.replace(tzinfo=timezone.utc)
+                    age_months = (now - pub).days / 30.0
                     if age_months <= 12:
                         source_scores.append(100.0)
                     elif age_months <= 24:

@@ -1,6 +1,7 @@
+import os
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, Query
-from fastapi.responses import PlainTextResponse, HTMLResponse
+from fastapi import APIRouter, Depends, Query, status
+from fastapi.responses import PlainTextResponse
 from sqlalchemy.orm import Session
 from app.database.session import get_db
 from app.models import (
@@ -9,23 +10,30 @@ from app.models import (
     Requirement,
     Contradiction,
     BlindSpot,
+    ReportDossier,
 )
-from app.schemas.reports import ExecutiveSummaryReport
+from app.schemas.reports import ReportGenerateRequest, ReportGenerateResponse
 from app.reports.generator import ReportGenerator
+from app.config import settings
+from app.core.exceptions import NotFoundError
 
-router = APIRouter(prefix="/reports", tags=["Reports & Export"])
+router = APIRouter(tags=["Reports"])
 
 
-@router.get("/{session_id}/markdown", response_class=PlainTextResponse)
-def export_markdown_report(session_id: str, db: Session = Depends(get_db)):
-    session = db.query(ResearchSession).filter(ResearchSession.id == session_id).first()
+@router.post("/research/{research_id}/report", response_model=ReportGenerateResponse, status_code=status.HTTP_201_CREATED)
+def generate_research_report(
+    research_id: str,
+    data: ReportGenerateRequest = None,
+    db: Session = Depends(get_db)
+):
+    session = db.query(ResearchSession).filter(ResearchSession.id == research_id).first()
     if not session:
-        raise HTTPException(status_code=404, detail="Session not found")
+        raise NotFoundError("ResearchSession", research_id)
 
-    sources = db.query(Source).filter(Source.session_id == session_id).all()
-    reqs = db.query(Requirement).filter(Requirement.session_id == session_id).all()
-    conflicts = db.query(Contradiction).filter(Contradiction.session_id == session_id).all()
-    blindspots = db.query(BlindSpot).filter(BlindSpot.session_id == session_id).all()
+    sources = db.query(Source).filter(Source.session_id == research_id).all()
+    reqs = db.query(Requirement).filter(Requirement.session_id == research_id).all()
+    conflicts = db.query(Contradiction).filter(Contradiction.session_id == research_id).all()
+    blindspots = db.query(BlindSpot).filter(BlindSpot.session_id == research_id).all()
 
     md_content = ReportGenerator.generate_markdown(
         session=session,
@@ -35,8 +43,80 @@ def export_markdown_report(session_id: str, db: Session = Depends(get_db)):
         blindspots=blindspots
     )
 
-    filename = f"ProofPath_Report_{session_id[:8]}.md"
+    report_title = (data.title if data and data.title else None) or f"Executive Briefing: {session.title}"
+    fmt = (data.format if data and data.format else "markdown")
+
+    report_dossier = ReportDossier(
+        session_id=research_id,
+        title=report_title,
+        format=fmt,
+        content_markdown=md_content,
+    )
+    db.add(report_dossier)
+    db.commit()
+    db.refresh(report_dossier)
+
+    # Save to disk
+    file_path = os.path.join(settings.REPORT_DIR, f"{report_dossier.id}_{report_dossier.title[:30]}.md")
+    with open(file_path, "w", encoding="utf-8") as f:
+        f.write(md_content)
+    report_dossier.file_path = file_path
+    db.commit()
+
+    return ReportGenerateResponse(
+        id=report_dossier.id,
+        session_id=report_dossier.session_id,
+        title=report_dossier.title,
+        format=report_dossier.format,
+        created_at=report_dossier.created_at,
+        download_url=f"/api/v1/reports/{report_dossier.id}/download"
+    )
+
+
+@router.get("/reports/{report_id}/download", response_class=PlainTextResponse)
+def download_report(report_id: str, db: Session = Depends(get_db)):
+    report = db.query(ReportDossier).filter(ReportDossier.id == report_id).first()
+    if not report:
+        raise NotFoundError("ReportDossier", report_id)
+
+    filename = f"ProofPath_Report_{report_id[:8]}.md"
     return PlainTextResponse(
-        content=md_content,
+        content=report.content_markdown,
         headers={"Content-Disposition": f'attachment; filename="{filename}"'}
     )
+
+
+@router.get("/reports/{research_id}/markdown", response_class=PlainTextResponse)
+def download_markdown_dossier(research_id: str, db: Session = Depends(get_db)):
+    # Check if research_id matches a ResearchSession
+    session = db.query(ResearchSession).filter(ResearchSession.id == research_id).first()
+    if session:
+        sources = db.query(Source).filter(Source.session_id == research_id).all()
+        reqs = db.query(Requirement).filter(Requirement.session_id == research_id).all()
+        conflicts = db.query(Contradiction).filter(Contradiction.session_id == research_id).all()
+        blindspots = db.query(BlindSpot).filter(BlindSpot.session_id == research_id).all()
+
+        md_content = ReportGenerator.generate_markdown(
+            session=session,
+            sources=sources,
+            requirements=reqs,
+            conflicts=conflicts,
+            blindspots=blindspots
+        )
+        safe_title = "".join(c for c in session.title if c.isalnum() or c in (" ", "_", "-")).rstrip()
+        filename = f"ProofPath_{safe_title[:20].strip().replace(' ', '_')}_Report.md"
+        return PlainTextResponse(
+            content=md_content,
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+        )
+
+    # Check if it's a ReportDossier id
+    report = db.query(ReportDossier).filter(ReportDossier.id == research_id).first()
+    if report:
+        filename = f"ProofPath_Report_{report.id[:8]}.md"
+        return PlainTextResponse(
+            content=report.content_markdown,
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+        )
+
+    raise NotFoundError("ResearchSession or Report", research_id)

@@ -1,5 +1,5 @@
-from typing import List, Dict, Any
-from fastapi import APIRouter, Depends, HTTPException
+from typing import List
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.database.session import get_db
 from app.models import (
@@ -13,48 +13,26 @@ from app.models import (
 )
 from app.schemas.evidence import (
     AtomicClaimResponse,
-    EvidenceLinkResponse,
     EvidenceGraphResponse,
     MatrixViewResponse,
     MatrixCell,
 )
 from app.intelligence.graph_builder import GraphBuilder
+from app.core.exceptions import NotFoundError
 
-router = APIRouter(prefix="/evidence", tags=["Evidence & Graph"])
-
-
-@router.get("/{session_id}/claims", response_model=List[AtomicClaimResponse])
-def get_claims(session_id: str, db: Session = Depends(get_db)):
-    claims = db.query(AtomicClaim).join(DocumentChunk).join(Source).filter(Source.session_id == session_id).all()
-    results = []
-    for c in claims:
-        chunk = c.chunk
-        source = chunk.source if chunk else None
-        results.append(
-            AtomicClaimResponse(
-                id=c.id,
-                chunk_id=c.chunk_id,
-                source_id=source.id if source else "",
-                source_title=source.title if source else "Source",
-                source_type=source.source_type if source else "text",
-                page_number=chunk.page_number if chunk else None,
-                claim_text=c.claim_text,
-                exact_quote=c.exact_quote,
-                claim_type=c.claim_type,
-                date_reference=c.date_reference,
-                confidence_score=c.confidence_score,
-                is_verified=c.is_verified
-            )
-        )
-    return results
+router = APIRouter(tags=["Evidence"])
 
 
-@router.get("/{session_id}/matrix", response_model=MatrixViewResponse)
-def get_matrix_view(session_id: str, db: Session = Depends(get_db)):
-    reqs = db.query(Requirement).filter(Requirement.session_id == session_id).order_by(Requirement.order_index).all()
-    sources = db.query(Source).filter(Source.session_id == session_id).all()
-    links = db.query(EvidenceLink).join(Requirement).filter(Requirement.session_id == session_id).all()
-    conflicts = db.query(Contradiction).filter(Contradiction.session_id == session_id).all()
+@router.get("/research/{research_id}/evidence", response_model=MatrixViewResponse)
+def get_research_evidence_matrix(research_id: str, db: Session = Depends(get_db)):
+    session = db.query(ResearchSession).filter(ResearchSession.id == research_id).first()
+    if not session:
+        raise NotFoundError("ResearchSession", research_id)
+
+    reqs = db.query(Requirement).filter(Requirement.session_id == research_id).order_by(Requirement.order_index).all()
+    sources = db.query(Source).filter(Source.session_id == research_id).all()
+    links = db.query(EvidenceLink).join(Requirement).filter(Requirement.session_id == research_id).all()
+    conflicts = db.query(Contradiction).filter(Contradiction.session_id == research_id).all()
 
     req_dicts = [{"id": r.id, "text": r.requirement_text, "category": r.category, "status": r.status} for r in reqs]
     source_dicts = [{"id": s.id, "title": s.title, "type": s.source_type} for s in sources]
@@ -112,16 +90,17 @@ def get_matrix_view(session_id: str, db: Session = Depends(get_db)):
     )
 
 
-@router.get("/{session_id}/graph", response_model=EvidenceGraphResponse)
-def get_evidence_graph(session_id: str, db: Session = Depends(get_db)):
-    session = db.query(ResearchSession).filter(ResearchSession.id == session_id).first()
+@router.get("/research/{research_id}/graph", response_model=EvidenceGraphResponse)
+@router.get("/evidence/{research_id}/graph", response_model=EvidenceGraphResponse)
+def get_research_evidence_graph(research_id: str, db: Session = Depends(get_db)):
+    session = db.query(ResearchSession).filter(ResearchSession.id == research_id).first()
     if not session:
-        raise HTTPException(status_code=404, detail="Session not found")
+        raise NotFoundError("ResearchSession", research_id)
 
-    reqs = db.query(Requirement).filter(Requirement.session_id == session_id).all()
-    sources = db.query(Source).filter(Source.session_id == session_id).all()
-    links = db.query(EvidenceLink).join(Requirement).filter(Requirement.session_id == session_id).all()
-    conflicts = db.query(Contradiction).filter(Contradiction.session_id == session_id).all()
+    reqs = db.query(Requirement).filter(Requirement.session_id == research_id).all()
+    sources = db.query(Source).filter(Source.session_id == research_id).all()
+    links = db.query(EvidenceLink).join(Requirement).filter(Requirement.session_id == research_id).all()
+    conflicts = db.query(Contradiction).filter(Contradiction.session_id == research_id).all()
 
     return GraphBuilder.build_evidence_graph(
         session_title=session.title,
@@ -131,3 +110,34 @@ def get_evidence_graph(session_id: str, db: Session = Depends(get_db)):
         evidence_links=links,
         contradictions=conflicts
     )
+
+
+@router.get("/evidence/{research_id}/matrix", response_model=MatrixViewResponse)
+def get_evidence_matrix_alias(research_id: str, db: Session = Depends(get_db)):
+    return get_research_evidence_matrix(research_id, db)
+
+
+@router.get("/evidence/{research_id}/claims", response_model=List[AtomicClaimResponse])
+def get_evidence_claims_alias(research_id: str, db: Session = Depends(get_db)):
+    claims = db.query(AtomicClaim).join(DocumentChunk).join(Source).filter(Source.session_id == research_id).all()
+    results = []
+    for c in claims:
+        chunk = c.chunk
+        source = chunk.source if chunk else None
+        results.append(
+            AtomicClaimResponse(
+                id=c.id,
+                chunk_id=c.chunk_id,
+                source_id=source.id if source else "",
+                source_title=source.title if source else "Source",
+                source_type=source.source_type if source else "text",
+                page_number=chunk.page_number if chunk else None,
+                claim_text=c.claim_text,
+                exact_quote=c.exact_quote,
+                claim_type=c.claim_type,
+                date_reference=c.date_reference,
+                confidence_score=c.confidence_score,
+                is_verified=c.is_verified
+            )
+        )
+    return results
