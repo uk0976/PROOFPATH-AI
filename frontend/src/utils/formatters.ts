@@ -21,23 +21,23 @@ export function getReadinessTier(score: number): {
   if (score >= 80) {
     return {
       tier: "Decision-Ready",
-      color: "text-emerald-700",
-      bgColor: "bg-emerald-50",
-      borderColor: "border-emerald-200",
+      color: "text-[#23865B]",
+      bgColor: "bg-[#EBF6F0]",
+      borderColor: "border-[#BCE4CF]",
     }
   } else if (score >= 50) {
     return {
       tier: "Conditional Proceed",
-      color: "text-amber-700",
-      bgColor: "bg-amber-50",
-      borderColor: "border-amber-200",
+      color: "text-[#C28A32]",
+      bgColor: "bg-[#FDF7EC]",
+      borderColor: "border-[#F5DFB5]",
     }
   } else {
     return {
       tier: "Critical Blindspots",
-      color: "text-rose-700",
-      bgColor: "bg-rose-50",
-      borderColor: "border-rose-200",
+      color: "text-[#C65353]",
+      bgColor: "bg-[#FDF2F2]",
+      borderColor: "border-[#F5C2C2]",
     }
   }
 }
@@ -50,21 +50,21 @@ export function getSeverityBadge(severity: string): {
   switch (severity?.toLowerCase()) {
     case "high":
       return {
-        color: "text-rose-700",
-        bgColor: "bg-rose-50",
-        borderColor: "border-rose-200",
+        color: "text-[#C65353]",
+        bgColor: "bg-[#FDF2F2]",
+        borderColor: "border-[#F5C2C2]",
       }
     case "medium":
       return {
-        color: "text-amber-700",
-        bgColor: "bg-amber-50",
-        borderColor: "border-amber-200",
+        color: "text-[#C28A32]",
+        bgColor: "bg-[#FDF7EC]",
+        borderColor: "border-[#F5DFB5]",
       }
     default:
       return {
-        color: "text-slate-700",
-        bgColor: "bg-slate-50",
-        borderColor: "border-slate-200",
+        color: "text-[#315B83]",
+        bgColor: "bg-[#EBF1F7]",
+        borderColor: "border-[#D0DEEC]",
       }
   }
 }

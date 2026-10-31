@@ -8,50 +8,57 @@ export default {
   theme: {
     extend: {
       colors: {
-        canvas: {
-          DEFAULT: "#FBFBFD",
-          subtle: "#F4F4F7",
+        primary: {
+          DEFAULT: "#172B45",
+          hover: "#101F33",
+          light: "#213C5E",
         },
-        navy: {
-          50: "#F0F4F8",
-          100: "#D9E2EC",
-          200: "#BCCCDC",
-          300: "#9FB3C8",
-          400: "#829AB1",
-          500: "#627D98",
-          600: "#486581",
-          700: "#334E68",
-          800: "#1E3A5F",
-          900: "#0F172A", // Deep Navy Primary
-          950: "#0A0F1D",
+        secondary: {
+          DEFAULT: "#315B83",
+          hover: "#264868",
+          light: "#EBF1F7",
         },
-        brand: {
-          DEFAULT: "#2563EB", // Muted Blue Primary
-          hover: "#1D4ED8",
-          subtle: "#EFF6FF",
-          border: "#BFDBFE",
+        background: {
+          DEFAULT: "#F7F8FA",
+          subtle: "#EFF1F5",
         },
-        semantic: {
+        surface: {
+          DEFAULT: "#FFFFFF",
+          muted: "#F9FAFC",
+        },
+        ink: {
+          DEFAULT: "#202B38", // Primary Text
+          secondary: "#687586", // Secondary Text
+          muted: "#8C9BAE",
+          subtle: "#B0BCCB",
+        },
+        border: {
+          DEFAULT: "#E5E9EF",
+          strong: "#CDD4DF",
+          subtle: "#F0F2F6",
+        },
+        status: {
           success: {
-            DEFAULT: "#059669",
-            bg: "#ECFDF5",
-            border: "#A7F3D0",
+            DEFAULT: "#23865B",
+            bg: "#EBF6F0",
+            border: "#BCE4CF",
           },
           warning: {
-            DEFAULT: "#D97706",
-            bg: "#FFFBEB",
-            border: "#FDE68A",
+            DEFAULT: "#C28A32",
+            bg: "#FDF7EC",
+            border: "#F5DFB5",
           },
           danger: {
-            DEFAULT: "#DC2626",
-            bg: "#FEF2F2",
-            border: "#FECACA",
+            DEFAULT: "#C65353",
+            bg: "#FDF2F2",
+            border: "#F5C2C2",
           },
         },
       },
       fontFamily: {
         sans: [
           "Inter",
+          "Geist",
           "-apple-system",
           "BlinkMacSystemFont",
           "Segoe UI",
@@ -66,9 +73,9 @@ export default {
         ],
       },
       boxShadow: {
-        subtle: "0 1px 2px 0 rgba(15, 23, 42, 0.05)",
-        card: "0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.04)",
-        elevated: "0 4px 6px -1px rgba(15, 23, 42, 0.06), 0 2px 4px -2px rgba(15, 23, 42, 0.04)",
+        subtle: "0 1px 2px 0 rgba(23, 43, 69, 0.04)",
+        card: "0 1px 3px 0 rgba(23, 43, 69, 0.05), 0 1px 2px -1px rgba(23, 43, 69, 0.03)",
+        elevated: "0 4px 12px -2px rgba(23, 43, 69, 0.08), 0 2px 6px -1px rgba(23, 43, 69, 0.04)",
       },
     },
   },
