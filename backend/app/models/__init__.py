@@ -10,6 +10,7 @@ from app.models.blindspot import BlindSpot
 from app.models.verification_task import VerificationTask
 from app.models.report import ReportDossier
 from app.models.audit_log import AuditLog
+from app.models.job import InvestigationJob
 
 __all__ = [
     "BaseModel",
@@ -24,4 +25,5 @@ __all__ = [
     "VerificationTask",
     "ReportDossier",
     "AuditLog",
+    "InvestigationJob",
 ]

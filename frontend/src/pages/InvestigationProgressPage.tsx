@@ -25,7 +25,7 @@ export const InvestigationProgressPage: React.FC = () => {
 
   // Real backend progress tracking — strictly not hardcoded
   const [progress, setProgress] = useState(0)
-  const [currentStage, setCurrentStage] = useState("INVESTIGATION_STARTED")
+  const [currentStage, setCurrentStage] = useState("RESEARCH_GOAL_ANALYSIS")
   const [statusMessage, setStatusMessage] = useState("Connecting to live intelligence telemetry...")
   const [eventLogs, setEventLogs] = useState<string[]>([])
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -36,6 +36,38 @@ export const InvestigationProgressPage: React.FC = () => {
     queryFn: () => researchService.getSession(id!),
     enabled: !!id,
   })
+
+  // Fetch persisted job state for resilience on browser refresh
+  const { data: job } = useQuery({
+    queryKey: ["job", id],
+    queryFn: () => researchService.getJob(id!),
+    enabled: !!id,
+    refetchInterval: isCompleted || errorMessage ? false : 3000,
+  })
+
+  // Synchronize persisted job state on browser refresh
+  useEffect(() => {
+    if (job) {
+      if (job.progress_percent !== undefined && job.progress_percent > 0) {
+        setProgress(Math.round(job.progress_percent))
+      }
+      if (job.current_stage) {
+        setCurrentStage(job.current_stage)
+      }
+      if (job.message) {
+        setStatusMessage(job.message)
+      }
+      if (job.error_message) {
+        setErrorMessage(job.error_message)
+      }
+      if (job.status === "completed" || session?.status === "completed") {
+        setIsCompleted(true)
+        setTimeout(() => {
+          navigate(`/investigation/${id}`)
+        }, 1200)
+      }
+    }
+  }, [job, session?.status, id, navigate])
 
   // SSE Listener for real-time progress updates from backend
   useEffect(() => {
@@ -63,12 +95,13 @@ export const InvestigationProgressPage: React.FC = () => {
       }
 
       if (
-        payload.stage === "REPORT_PREPARATION_COMPLETED" ||
+        payload.stage === "VERIFICATION_TASK_GENERATION" ||
         payload.stage === "COMPLETE" ||
         payload.progress >= 100
       ) {
         setIsCompleted(true)
         queryClient.invalidateQueries({ queryKey: ["session", id] })
+        queryClient.invalidateQueries({ queryKey: ["job", id] })
         queryClient.invalidateQueries({ queryKey: ["conflicts", id] })
         queryClient.invalidateQueries({ queryKey: ["gaps", id] })
         queryClient.invalidateQueries({ queryKey: ["blindspots", id] })
@@ -90,17 +123,23 @@ export const InvestigationProgressPage: React.FC = () => {
       }
     })
 
-    // Specific event listeners for all prompt-specified milestones
+    // Listen to all 15 stages events
     const eventNames = [
-      "investigation_started",
-      "source_extraction_started",
+      "research_goal_analyzed",
+      "question_decomposition_completed",
+      "source_collection_completed",
       "source_extraction_completed",
       "claim_extraction_completed",
+      "embedding_generation_completed",
       "evidence_retrieval_completed",
-      "gap_analysis_completed",
+      "requirement_mapping_completed",
+      "gap_detection_completed",
       "contradiction_analysis_completed",
-      "blindspot_analysis_completed",
-      "report_preparation_completed",
+      "temporal_analysis_completed",
+      "blindspot_discovery_completed",
+      "evidence_graph_constructed",
+      "decision_readiness_calculated",
+      "verification_tasks_generated",
       "investigation_failed",
     ]
 
@@ -125,8 +164,7 @@ export const InvestigationProgressPage: React.FC = () => {
 
     eventSource.addEventListener("error", (e) => {
       if (!isCompleted && progress < 100) {
-        // SSE disconnections or network drops
-        console.warn("SSE connection closed or lost. Retrying via state query...")
+        console.warn("SSE connection closed or lost. Polling via job manager...")
       }
     })
 
@@ -135,16 +173,23 @@ export const InvestigationProgressPage: React.FC = () => {
     }
   }, [id, navigate, queryClient, isCompleted, progress])
 
+  // Complete 15-Stage Architecture
   const stages = [
-    { key: "INVESTIGATION_STARTED", label: "Investigation Workspace Initialized", threshold: 5 },
-    { key: "SOURCE_EXTRACTION_COMPLETED", label: "Source Extraction & FAISS Vector Indexing", threshold: 20 },
-    { key: "RESEARCH_PLANNING", label: "MECE Evaluation Goal Decomposition", threshold: 35 },
-    { key: "CLAIM_EXTRACTION_COMPLETED", label: "Atomic Claim Extraction & Quote Validation", threshold: 60 },
-    { key: "EVIDENCE_RETRIEVAL_COMPLETED", label: "Evidence Retrieval & Semantic Mapping", threshold: 74 },
-    { key: "GAP_ANALYSIS_COMPLETED", label: "Gap & Silence Analysis", threshold: 80 },
-    { key: "CONTRADICTION_ANALYSIS_COMPLETED", label: "Cross-Source Contradiction Audit", threshold: 86 },
-    { key: "BLINDSPOT_ANALYSIS_COMPLETED", label: "BlindSpot Discovery & Counter-factuals", threshold: 92 },
-    { key: "REPORT_PREPARATION_COMPLETED", label: "Decision Readiness Verdict", threshold: 100 },
+    { key: "RESEARCH_GOAL_ANALYSIS", label: "1. Research Goal Analysis", threshold: 7 },
+    { key: "QUESTION_DECOMPOSITION", label: "2. Question Decomposition", threshold: 14 },
+    { key: "SOURCE_COLLECTION", label: "3. Source Collection", threshold: 20 },
+    { key: "SOURCE_EXTRACTION", label: "4. Source Extraction", threshold: 27 },
+    { key: "ATOMIC_CLAIM_EXTRACTION", label: "5. Atomic Claim Extraction", threshold: 34 },
+    { key: "EMBEDDING_GENERATION", label: "6. Dense Embedding Generation", threshold: 41 },
+    { key: "EVIDENCE_RETRIEVAL", label: "7. Evidence Retrieval", threshold: 48 },
+    { key: "REQUIREMENT_TO_CLAIM_MAPPING", label: "8. Requirement-to-Claim Mapping", threshold: 55 },
+    { key: "GAP_DETECTION", label: "9. Information Gap Detection", threshold: 62 },
+    { key: "CONTRADICTION_ANALYSIS", label: "10. Contradiction Analysis", threshold: 69 },
+    { key: "TEMPORAL_ANALYSIS", label: "11. Temporal Freshness Audit", threshold: 76 },
+    { key: "BLINDSPOT_DISCOVERY", label: "12. BlindSpot Discovery", threshold: 83 },
+    { key: "EVIDENCE_GRAPH_CONSTRUCTION", label: "13. Evidence Graph Construction", threshold: 89 },
+    { key: "DECISION_READINESS_CALCULATION", label: "14. Decision Readiness Scoring", threshold: 95 },
+    { key: "VERIFICATION_TASK_GENERATION", label: "15. Verification Task Generation", threshold: 100 },
   ]
 
   return (
@@ -152,7 +197,7 @@ export const InvestigationProgressPage: React.FC = () => {
       {/* Header */}
       <div className="text-center space-y-2">
         <Badge variant="secondary" className="font-mono text-xs">
-          LIVE INVESTIGATION TELEMETRY
+          15-STAGE ASYNCHRONOUS PIPELINE
         </Badge>
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink">
           Forensic Multi-Agent Investigation in Progress
@@ -198,8 +243,8 @@ export const InvestigationProgressPage: React.FC = () => {
 
         <Progress value={progress} />
 
-        {/* Step-by-Step Agent Milestones */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2">
+        {/* Step-by-Step 15 Agent Milestones */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 pt-2">
           {stages.map((stage) => {
             const isFinished = progress >= stage.threshold || isCompleted
             const isCurrent = currentStage === stage.key && !isCompleted && !errorMessage
@@ -207,7 +252,7 @@ export const InvestigationProgressPage: React.FC = () => {
             return (
               <div
                 key={stage.key}
-                className={`p-2.5 rounded-lg border text-xs flex items-center gap-2.5 transition-all ${
+                className={`p-2 rounded-lg border text-[11px] flex items-center gap-2 transition-all ${
                   isFinished
                     ? "bg-status-success-bg border-status-success-border text-status-success font-medium"
                     : isCurrent
@@ -216,11 +261,11 @@ export const InvestigationProgressPage: React.FC = () => {
                 }`}
               >
                 {isFinished ? (
-                  <CheckCircle2 className="w-4 h-4 text-status-success shrink-0" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-status-success shrink-0" />
                 ) : isCurrent ? (
-                  <RefreshCw className="w-4 h-4 text-secondary animate-spin shrink-0" />
+                  <RefreshCw className="w-3.5 h-3.5 text-secondary animate-spin shrink-0" />
                 ) : (
-                  <Clock className="w-4 h-4 text-ink-subtle shrink-0" />
+                  <Clock className="w-3.5 h-3.5 text-ink-subtle shrink-0" />
                 )}
                 <span className="truncate">{stage.label}</span>
               </div>

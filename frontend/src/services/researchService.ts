@@ -21,8 +21,13 @@ export const researchService = {
     return res.data
   },
 
-  async startInvestigation(id: string): Promise<{ session_id: string; status: string; stream_url: string }> {
+  async startInvestigation(id: string): Promise<{ session_id: string; status: string; stream_url: string; job_id?: string }> {
     const res = await apiClient.post(`/research/${id}/start`)
+    return res.data
+  },
+
+  async getJob(id: string): Promise<any> {
+    const res = await apiClient.get(`/research/${id}/job`)
     return res.data
   },
 }

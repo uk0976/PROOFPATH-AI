@@ -1,19 +1,21 @@
 import asyncio
 import json
 import logging
-from typing import List
+from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from app.database.session import get_db, SessionLocal
-from app.models import ResearchSession, Source, Requirement, Contradiction, BlindSpot
+from app.models import ResearchSession, Source, Requirement, Contradiction, BlindSpot, InvestigationJob
 from app.schemas.research import (
     ResearchSessionCreate,
     ResearchSessionUpdate,
     ResearchSessionSummary,
     ResearchSessionResponse,
 )
+from app.schemas.job import JobResponse
 from app.services.pipeline_orchestrator import PipelineOrchestrator
+from app.services.job_manager import job_manager
 from app.services.event_stream import sse_manager
 from app.core.exceptions import NotFoundError, AppException
 
@@ -22,14 +24,7 @@ router = APIRouter(tags=["Research"])
 
 
 async def run_pipeline_task(session_id: str):
-    db = SessionLocal()
-    try:
-        orchestrator = PipelineOrchestrator(db=db, session_id=session_id)
-        await orchestrator.run()
-    except Exception as e:
-        logger.exception(f"Background pipeline failed for {session_id}: {e}")
-    finally:
-        db.close()
+    job_manager.start_investigation_job(session_id=session_id)
 
 
 @router.post("/research", response_model=ResearchSessionResponse, status_code=status.HTTP_201_CREATED)
@@ -94,7 +89,7 @@ def delete_research(research_id: str, db: Session = Depends(get_db)):
 @router.post("/research/{research_id}/start", status_code=status.HTTP_202_ACCEPTED)
 async def start_research(
     research_id: str,
-    background_tasks: BackgroundTasks,
+    force_rerun: bool = False,
     db: Session = Depends(get_db)
 ):
     session = db.query(ResearchSession).filter(ResearchSession.id == research_id).first()
@@ -105,17 +100,28 @@ async def start_research(
     if sources_count == 0:
         raise AppException("Cannot start investigation: Please attach at least one source document first.", status_code=400, code="NO_SOURCES")
 
-    session.status = "processing"
-    db.commit()
-
-    background_tasks.add_task(run_pipeline_task, session_id=research_id)
+    job, is_new = job_manager.start_investigation_job(session_id=research_id, force_rerun=force_rerun)
 
     return {
         "success": True,
         "research_id": research_id,
-        "status": "processing",
+        "job_id": job.id,
+        "is_new": is_new,
+        "status": job.status,
+        "current_stage": job.current_stage,
+        "progress_percent": job.progress_percent,
         "progress_stream_url": f"/api/v1/research/{research_id}/progress"
     }
+
+
+@router.get("/research/{research_id}/job", response_model=Optional[JobResponse])
+def get_research_job(research_id: str, db: Session = Depends(get_db)):
+    session = db.query(ResearchSession).filter(ResearchSession.id == research_id).first()
+    if not session:
+        raise NotFoundError("ResearchSession", research_id)
+
+    job = job_manager.get_session_latest_job(research_id, db)
+    return job
 
 
 @router.get("/research/{research_id}/progress")

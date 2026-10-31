@@ -47,8 +47,10 @@ from app.schemas.reports import (
     ReportGenerateResponse,
     ExecutiveSummaryReport,
 )
+from app.schemas.job import JobResponse
 
 __all__ = [
+    "JobResponse",
     "ResearchSessionCreate",
     "ResearchSessionUpdate",
     "ResearchSessionSummary",
