@@ -53,6 +53,22 @@ def ensure_database_schema(eng):
                 if col_name not in source_cols:
                     cursor.execute(f"ALTER TABLE sources ADD COLUMN {col_name} {col_type}")
 
+            # Check and update atomic_claims table
+            cursor.execute("PRAGMA table_info(atomic_claims)")
+            claim_cols = {row[1] for row in cursor.fetchall()}
+            claim_new_cols = [
+                ("source_id", "VARCHAR(36)"),
+                ("category", "VARCHAR(100) DEFAULT 'General'"),
+                ("original_evidence_text", "TEXT"),
+                ("page_number", "INTEGER"),
+                ("paragraph_reference", "VARCHAR(100)"),
+                ("applicable_period", "VARCHAR(100)"),
+                ("extraction_confidence", "FLOAT DEFAULT 0.95"),
+            ]
+            for col_name, col_type in claim_new_cols:
+                if col_name not in claim_cols:
+                    cursor.execute(f"ALTER TABLE atomic_claims ADD COLUMN {col_name} {col_type}")
+
             conn.connection.commit()
     except Exception as e:
         logger.warning(f"Schema migration check: {e}")

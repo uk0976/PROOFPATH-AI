@@ -45,8 +45,29 @@ export const findingService = {
     return res.data
   },
 
-  async getClaims(sessionId: string): Promise<AtomicClaimItem[]> {
-    const res = await apiClient.get<AtomicClaimItem[]>(`/research/${sessionId}/claims`)
+  async getClaims(
+    sessionId: string,
+    params?: {
+      category?: string
+      source_id?: string
+      source_type?: string
+      is_verified?: boolean
+      search?: string
+    }
+  ): Promise<AtomicClaimItem[]> {
+    const res = await apiClient.get<AtomicClaimItem[]>(`/research/${sessionId}/claims`, { params })
+    return res.data
+  },
+
+  async extractClaims(sessionId: string): Promise<AtomicClaimItem[]> {
+    const res = await apiClient.post<AtomicClaimItem[]>(`/research/${sessionId}/extract-claims`)
+    return res.data
+  },
+
+  async retrieveEvidence(sessionId: string, similarityThreshold = 0.30): Promise<any> {
+    const res = await apiClient.post(`/research/${sessionId}/retrieve-evidence`, null, {
+      params: { similarity_threshold: similarityThreshold }
+    })
     return res.data
   },
 

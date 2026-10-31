@@ -98,13 +98,23 @@ export interface AtomicClaimItem {
   source_id: string
   source_title: string
   source_type: string
-  page_number?: number
+  source_uri?: string
+  source_domain?: string
   claim_text: string
+  category?: string
+  original_evidence_text?: string
   exact_quote: string
-  claim_type: string
+  page_number?: number
+  paragraph_reference?: string
+  applicable_period?: string
   date_reference?: string
+  claim_type: string
   confidence_score: number
+  extraction_confidence?: number
   is_verified: boolean
+  linked_requirements_count?: number
+  linked_requirement_ids?: string[]
+  created_at?: string
 }
 
 export interface ClaimSnippet {

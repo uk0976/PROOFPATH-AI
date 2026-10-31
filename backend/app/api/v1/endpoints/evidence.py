@@ -116,6 +116,28 @@ def get_research_evidence_graph(research_id: str, db: Session = Depends(get_db))
     )
 
 
+@router.post("/research/{research_id}/retrieve-evidence", status_code=200)
+def trigger_evidence_retrieval(
+    research_id: str,
+    similarity_threshold: float = 0.30,
+    top_k: int = 5,
+    db: Session = Depends(get_db)
+):
+    """Executes FAISS indexing, hybrid semantic/keyword search, and requirement-to-claim mapping."""
+    from app.intelligence.evidence_retrieval_engine import EvidenceRetrievalEngine
+    session = db.query(ResearchSession).filter(ResearchSession.id == research_id).first()
+    if not session:
+        raise NotFoundError("ResearchSession", research_id)
+
+    summary = EvidenceRetrievalEngine.execute_session_evidence_mapping(
+        db=db,
+        session_id=research_id,
+        similarity_threshold=similarity_threshold,
+        top_k=top_k,
+    )
+    return summary
+
+
 @router.get("/evidence/{research_id}/matrix", response_model=MatrixViewResponse)
 def get_evidence_matrix_alias(research_id: str, db: Session = Depends(get_db)):
     return get_research_evidence_matrix(research_id, db)

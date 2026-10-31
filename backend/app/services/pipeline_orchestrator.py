@@ -540,15 +540,28 @@ class PipelineOrchestrator:
 
         for chunk in all_chunks:
             source_title = chunk.source.title if chunk.source else ""
-            claims_data = await claim_agent.extract_claims(chunk.text_content, source_title)
+            claims_data = await claim_agent.extract_claims_from_chunk(
+                chunk_text=chunk.text_content,
+                source_title=source_title,
+                page_number=chunk.page_number,
+                source_id=chunk.source_id,
+            )
             for cd in claims_data:
+                quote = cd.get("exact_quote") or cd.get("original_evidence_text") or chunk.text_content[:120]
                 claim = AtomicClaim(
                     chunk_id=chunk.id,
+                    source_id=chunk.source_id,
                     claim_text=cd["claim_text"],
-                    exact_quote=cd["exact_quote"],
+                    category=cd.get("category", "General"),
+                    original_evidence_text=quote,
+                    exact_quote=quote,
+                    page_number=cd.get("page_number", chunk.page_number),
+                    paragraph_reference=cd.get("paragraph_reference") or (f"Page {chunk.page_number}" if chunk.page_number else None),
+                    applicable_period=cd.get("applicable_period") or cd.get("date_reference"),
+                    date_reference=cd.get("date_reference") or cd.get("applicable_period"),
                     claim_type=cd.get("claim_type", "assertion"),
-                    date_reference=cd.get("date_reference"),
-                    confidence_score=float(cd.get("confidence_score", 0.9)),
+                    confidence_score=float(cd.get("confidence_score", 0.95)),
+                    extraction_confidence=float(cd.get("extraction_confidence", 0.95)),
                     is_verified=bool(cd.get("is_verified", False))
                 )
                 self.db.add(claim)
