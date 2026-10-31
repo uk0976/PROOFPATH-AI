@@ -54,9 +54,10 @@ apiClient.interceptors.response.use(
         )
       }
       console.error("[ProofPath API] Network / API disconnection error:", error.message)
+      const targetHint = API_BASE_URL.includes("localhost") ? "on http://localhost:8000" : `at ${API_BASE_URL}`
       return Promise.reject(
         new ProofPathApiError(
-          "Unable to connect to ProofPath backend. Please ensure the API is running on http://localhost:8000.",
+          `Unable to connect to ProofPath backend. Please ensure the API is running ${targetHint}.`,
           0,
           "NETWORK_DISCONNECTED"
         )
