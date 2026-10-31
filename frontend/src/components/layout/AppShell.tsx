@@ -3,6 +3,7 @@ import { Outlet, useLocation, useParams } from "react-router-dom"
 import { Navbar } from "./Navbar"
 import { Sidebar } from "./Sidebar"
 import { DemoBanner } from "@/components/demo/DemoBanner"
+import { ThemeToggleFloating } from "@/components/common/ThemeToggleFloating"
 import { DEMO_SESSION_ID, DEMO_ALIAS_ID } from "@/utils/sampleData"
 
 export const AppShell: React.FC = () => {
@@ -20,7 +21,7 @@ export const AppShell: React.FC = () => {
   const autoOpenTour = location.search.includes("tour=true")
 
   return (
-    <div className="min-h-screen bg-background flex flex-col font-sans text-ink">
+    <div className="min-h-screen bg-background flex flex-col font-sans text-ink transition-colors duration-200">
       <Navbar />
       {isDemo && <DemoBanner initialTourOpen={autoOpenTour} />}
       <div className="flex-1 flex overflow-hidden">
@@ -29,6 +30,8 @@ export const AppShell: React.FC = () => {
           <Outlet />
         </main>
       </div>
+      {/* High-visibility floating theme switcher in bottom-right */}
+      <ThemeToggleFloating />
     </div>
   )
 }

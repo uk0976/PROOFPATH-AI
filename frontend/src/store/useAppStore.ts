@@ -23,11 +23,20 @@ export function applyTheme(theme: ThemeMode) {
   }
 }
 
-// Get initial theme preference
-const initialTheme: ThemeMode =
-  typeof window !== "undefined"
-    ? ((localStorage.getItem("proofpath_theme") as ThemeMode) || "light")
-    : "light"
+// Get initial theme preference: default to system if no stored preference
+const getInitialTheme = (): ThemeMode => {
+  if (typeof window === "undefined") return "light"
+  try {
+    const stored = localStorage.getItem("proofpath_theme") as ThemeMode
+    if (stored) return stored
+    if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      return "dark"
+    }
+  } catch (e) {}
+  return "light"
+}
+
+const initialTheme: ThemeMode = getInitialTheme()
 
 // Apply theme on file evaluation
 if (typeof window !== "undefined") {

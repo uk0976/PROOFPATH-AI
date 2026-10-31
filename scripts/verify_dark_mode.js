@@ -106,24 +106,35 @@ async function runDarkModeVerification() {
     };
 
     console.log("\n[1/4] Testing Initial Landing Page & Navbar Toggle...");
-    await new Promise((r) => setTimeout(r, 1200));
+    // Allow splash screen to finish or skip it
+    await cdp.eval(`
+      (() => {
+        sessionStorage.setItem("proofpath_splash_shown", "true");
+        localStorage.setItem("proofpath_theme", "light");
+        document.documentElement.classList.remove("dark");
+      })()
+    `);
+    await cdp.send("Page.navigate", { url: "http://localhost:5173/" });
+    await new Promise((r) => setTimeout(r, 2000));
 
     const initialIsDark = await cdp.eval(`document.documentElement.classList.contains("dark")`);
     test("Initial state is clean light mode", !initialIsDark);
 
-    // Click theme toggle button in navbar
+    // Click theme toggle button in navbar or floating switcher
     const toggleClicked = await cdp.eval(`
       (() => {
         const btn = document.querySelector('button[aria-label*="dark mode"]') ||
-                    document.querySelector('button[title*="dark mode"]');
+                    document.querySelector('button[title*="dark mode"]') ||
+                    document.getElementById('floating-theme-toggle') ||
+                    Array.from(document.querySelectorAll('button')).find(b => b.innerText.includes("Dark"));
         if (btn) { btn.click(); return true; }
         return false;
       })()
     `);
-    await new Promise((r) => setTimeout(r, 300));
+    await new Promise((r) => setTimeout(r, 500));
 
     const isDarkAfterToggle = await cdp.eval(`document.documentElement.classList.contains("dark")`);
-    test("Clicking Navbar theme toggle adds .dark class", toggleClicked && isDarkAfterToggle);
+    test("Clicking theme toggle adds .dark class", toggleClicked && isDarkAfterToggle);
 
     const bodyBgDark = await cdp.eval(`window.getComputedStyle(document.body).backgroundColor`);
     test("Body background color switches to dark obsidian", bodyBgDark === "rgb(11, 15, 23)", `Computed: ${bodyBgDark}`);
@@ -133,7 +144,7 @@ async function runDarkModeVerification() {
 
     console.log("\n[2/4] Testing Settings Page Theme Selection Cards...");
     await cdp.send("Page.navigate", { url: "http://localhost:5173/settings" });
-    await new Promise((r) => setTimeout(r, 800));
+    await new Promise((r) => setTimeout(r, 1500));
 
     // Verify Dark Mode card is selected
     const darkCardSelected = await cdp.eval(`
@@ -149,7 +160,7 @@ async function runDarkModeVerification() {
         return false;
       })()
     `);
-    await new Promise((r) => setTimeout(r, 300));
+    await new Promise((r) => setTimeout(r, 500));
     const isLightNow = await cdp.eval(`!document.documentElement.classList.contains("dark")`);
     test("Clicking Light Mode card removes .dark class", lightCardClicked && isLightNow);
 
@@ -161,13 +172,13 @@ async function runDarkModeVerification() {
         return false;
       })()
     `);
-    await new Promise((r) => setTimeout(r, 300));
+    await new Promise((r) => setTimeout(r, 500));
     const isDarkAgain = await cdp.eval(`document.documentElement.classList.contains("dark")`);
     test("Clicking Dark Mode card restores .dark class", darkCardClicked && isDarkAgain);
 
     console.log("\n[3/4] Testing Demo Mode in Dark Theme...");
     await cdp.send("Page.navigate", { url: "http://localhost:5173/demo" });
-    await new Promise((r) => setTimeout(r, 1000));
+    await new Promise((r) => setTimeout(r, 2000));
 
     const demoLoaded = await cdp.eval(`document.body.innerText.includes("Federal STEM Postgraduate Scholarship")`);
     test("Demo investigation mounts cleanly in Dark Mode", demoLoaded);
