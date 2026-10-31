@@ -37,13 +37,30 @@ export interface RequirementItem {
   id: string
   session_id: string
   requirement_text: string
+  question?: string
+  description?: string
   category: string
+  importance?: "critical" | "high" | "medium" | "low" | string
+  priority?: "P0" | "P1" | "P2" | "P3" | string
   weight: number
-  status: "covered" | "partial" | "uncovered" | "conflict"
+  is_decision_critical: boolean
+  origin: "user_requested" | "ai_suggested" | string
+  is_approved: boolean
+  status: "covered" | "partial" | "uncovered" | "conflict" | string
   order_index: number
   created_at: string
   evidence_count: number
   conflict_count: number
+}
+
+export interface ResearchPlanSummary {
+  session_id: string
+  total_requirements: number
+  official_approved_count: number
+  ai_suggested_count: number
+  decision_critical_count: number
+  categories: string[]
+  requirements: RequirementItem[]
 }
 
 export interface AtomicClaimItem {

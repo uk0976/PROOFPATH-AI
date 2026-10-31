@@ -17,11 +17,35 @@ logging.basicConfig(
 logger = logging.getLogger("proofpath")
 
 
+def ensure_database_schema(eng):
+    try:
+        with eng.connect() as conn:
+            cursor = conn.connection.cursor()
+            cursor.execute("PRAGMA table_info(requirements)")
+            cols = {row[1] for row in cursor.fetchall()}
+            new_cols = [
+                ("question", "TEXT"),
+                ("description", "TEXT"),
+                ("importance", "VARCHAR(50) DEFAULT 'high'"),
+                ("priority", "VARCHAR(50) DEFAULT 'P1'"),
+                ("is_decision_critical", "BOOLEAN DEFAULT 0"),
+                ("origin", "VARCHAR(50) DEFAULT 'ai_suggested'"),
+                ("is_approved", "BOOLEAN DEFAULT 0"),
+            ]
+            for col_name, col_type in new_cols:
+                if col_name not in cols:
+                    cursor.execute(f"ALTER TABLE requirements ADD COLUMN {col_name} {col_type}")
+            conn.connection.commit()
+    except Exception as e:
+        logger.warning(f"Schema migration check: {e}")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # 1. Initialize database tables
+    # 1. Initialize database tables & apply schema upgrades
     logger.info("Initializing database schema...")
     Base.metadata.create_all(bind=engine)
+    ensure_database_schema(engine)
 
     # 2. Seed initial demo data if database is empty
     db = SessionLocal()

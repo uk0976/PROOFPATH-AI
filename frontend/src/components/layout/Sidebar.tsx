@@ -15,6 +15,7 @@ import {
   ChevronRight,
   ShieldCheck,
   Sparkles,
+  ListOrdered,
 } from "lucide-react"
 import { useAppStore } from "@/store/useAppStore"
 import { DEMO_SESSION_ID } from "@/utils/sampleData"
@@ -35,6 +36,7 @@ export const Sidebar: React.FC = () => {
 
   const forensicNavItems = [
     { label: "Intelligence Dossier", path: `/investigation/${activeSessionId}`, icon: ShieldCheck },
+    { label: "Research Plan", path: `/research/${activeSessionId}/plan`, icon: ListOrdered },
     { label: "Sources", path: `/sources/${activeSessionId}`, icon: FileText },
     { label: "Gap Analysis", path: `/gaps/${activeSessionId}`, icon: AlertTriangle },
     { label: "Evidence Explorer", path: `/evidence/${activeSessionId}`, icon: GitBranch },

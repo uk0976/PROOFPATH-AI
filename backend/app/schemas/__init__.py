@@ -14,8 +14,11 @@ from app.schemas.sources import (
 from app.schemas.requirements import (
     RequirementCreate,
     RequirementUpdate,
-    DecomposeRequest,
     RequirementResponse,
+    GeneratePlanRequest,
+    PlanApprovalRequest,
+    ResearchPlanSummaryResponse,
+    RequirementItemDTO,
 )
 from app.schemas.claims import (
     ClaimResponse,
@@ -62,8 +65,11 @@ __all__ = [
     "DocumentChunkResponse",
     "RequirementCreate",
     "RequirementUpdate",
-    "DecomposeRequest",
     "RequirementResponse",
+    "GeneratePlanRequest",
+    "PlanApprovalRequest",
+    "ResearchPlanSummaryResponse",
+    "RequirementItemDTO",
     "ClaimResponse",
     "ContradictionResponse",
     "InformationGapResponse",

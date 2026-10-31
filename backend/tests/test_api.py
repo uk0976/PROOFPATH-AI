@@ -55,7 +55,8 @@ def test_research_endpoints():
 
 def test_sources_endpoints():
     res = client.get("/api/v1/research")
-    session_id = res.json()[0]["id"]
+    session = next((s for s in res.json() if s.get("source_count", 0) > 0), res.json()[0])
+    session_id = session["id"]
 
     # Get Sources for Session
     sources_res = client.get(f"/api/v1/research/{session_id}/sources")
@@ -99,7 +100,8 @@ def test_requirements_endpoints():
 
 def test_claims_endpoints():
     res = client.get("/api/v1/research")
-    session_id = res.json()[0]["id"]
+    session = next((s for s in res.json() if s.get("source_count", 0) > 0), res.json()[0])
+    session_id = session["id"]
 
     claims_res = client.get(f"/api/v1/research/{session_id}/claims")
     assert claims_res.status_code == 200
@@ -155,7 +157,8 @@ def test_evidence_and_graph_endpoints():
 
 def test_blindspots_endpoints():
     res = client.get("/api/v1/research")
-    session_id = res.json()[0]["id"]
+    session = next((s for s in res.json() if s.get("conflict_count", 0) > 0 or s.get("source_count", 0) > 0), res.json()[0])
+    session_id = session["id"]
 
     blindspots_res = client.get(f"/api/v1/research/{session_id}/blindspots")
     assert blindspots_res.status_code == 200
@@ -171,7 +174,8 @@ def test_blindspots_endpoints():
 
 def test_verification_endpoints():
     res = client.get("/api/v1/research")
-    session_id = res.json()[0]["id"]
+    session = next((s for s in res.json() if s.get("conflict_count", 0) > 0 or s.get("source_count", 0) > 0), res.json()[0])
+    session_id = session["id"]
 
     verif_res = client.get(f"/api/v1/research/{session_id}/verification")
     assert verif_res.status_code == 200

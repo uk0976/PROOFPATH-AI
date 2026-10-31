@@ -2,81 +2,89 @@ from typing import List
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 from app.database.session import get_db
-from app.models import ResearchSession, Requirement, EvidenceLink, Contradiction
 from app.schemas.requirements import (
     RequirementCreate,
     RequirementUpdate,
     RequirementResponse,
+    GeneratePlanRequest,
+    PlanApprovalRequest,
+    ResearchPlanSummaryResponse,
 )
-from app.core.exceptions import NotFoundError
+from app.services.research_planner import research_planner_service
 
-router = APIRouter(tags=["Requirements"])
+router = APIRouter(tags=["Requirements & Research Planner"])
 
 
 @router.get("/research/{research_id}/requirements", response_model=List[RequirementResponse])
 @router.get("/requirements/{research_id}", response_model=List[RequirementResponse])
 def get_research_requirements(research_id: str, db: Session = Depends(get_db)):
-    session = db.query(ResearchSession).filter(ResearchSession.id == research_id).first()
-    if not session:
-        raise NotFoundError("ResearchSession", research_id)
-
-    reqs = db.query(Requirement).filter(Requirement.session_id == research_id).order_by(Requirement.order_index).all()
-    results = []
-    for r in reqs:
-        ev_count = db.query(EvidenceLink).filter(EvidenceLink.requirement_id == r.id).count()
-        conf_count = db.query(Contradiction).filter(Contradiction.requirement_id == r.id).count()
-        results.append(
-            RequirementResponse(
-                id=r.id,
-                session_id=r.session_id,
-                requirement_text=r.requirement_text,
-                category=r.category,
-                weight=r.weight,
-                status=r.status,
-                order_index=r.order_index,
-                created_at=r.created_at,
-                evidence_count=ev_count,
-                conflict_count=conf_count
-            )
-        )
-    return results
+    """
+    List all requirements for a research session with full metadata (question, category, description, importance, priority, provenance).
+    """
+    summary = research_planner_service.get_plan_summary(session_id=research_id, db=db)
+    return summary.requirements
 
 
-@router.post("/research/{research_id}/requirements", response_model=RequirementResponse, status_code=status.HTTP_201_CREATED)
+@router.get("/research/{research_id}/plan", response_model=ResearchPlanSummaryResponse)
+def get_research_plan(research_id: str, db: Session = Depends(get_db)):
+    """
+    Retrieves the structured research plan summary with category breakdowns and approval statistics.
+    """
+    return research_planner_service.get_plan_summary(session_id=research_id, db=db)
+
+
+@router.post("/research/{research_id}/plan/generate", response_model=ResearchPlanSummaryResponse)
+async def generate_research_plan(
+    research_id: str,
+    request: GeneratePlanRequest = GeneratePlanRequest(),
+    db: Session = Depends(get_db)
+):
+    """
+    Intelligent Research Planner: Converts broad research goals into structured,
+    independently verifiable research requirements via Gemini API.
+    All AI-generated questions are marked with origin='ai_suggested' and is_approved=False.
+    """
+    return await research_planner_service.generate_plan(
+        session_id=research_id,
+        request=request,
+        db=db
+    )
+
+
+@router.post("/research/{research_id}/plan/approve", response_model=ResearchPlanSummaryResponse)
+def approve_research_plan(
+    research_id: str,
+    request: PlanApprovalRequest = PlanApprovalRequest(),
+    db: Session = Depends(get_db)
+):
+    """
+    Approve AI-suggested research requirements, converting them into official requirements for the investigation.
+    Never presents unapproved suggestions as official requirements.
+    """
+    return research_planner_service.approve_plan(
+        session_id=research_id,
+        request=request,
+        db=db
+    )
+
+
+@router.post(
+    "/research/{research_id}/requirements",
+    response_model=RequirementResponse,
+    status_code=status.HTTP_201_CREATED
+)
 def create_requirement(
     research_id: str,
     data: RequirementCreate,
     db: Session = Depends(get_db)
 ):
-    session = db.query(ResearchSession).filter(ResearchSession.id == research_id).first()
-    if not session:
-        raise NotFoundError("ResearchSession", research_id)
-
-    max_order = db.query(Requirement).filter(Requirement.session_id == research_id).count()
-
-    req = Requirement(
+    """
+    Manually add a user-requested requirement. Marked as origin='user_requested' and is_approved=True.
+    """
+    return research_planner_service.add_user_requirement(
         session_id=research_id,
-        requirement_text=data.requirement_text,
-        category=data.category,
-        weight=data.weight,
-        status="uncovered",
-        order_index=max_order
-    )
-    db.add(req)
-    db.commit()
-    db.refresh(req)
-
-    return RequirementResponse(
-        id=req.id,
-        session_id=req.session_id,
-        requirement_text=req.requirement_text,
-        category=req.category,
-        weight=req.weight,
-        status=req.status,
-        order_index=req.order_index,
-        created_at=req.created_at,
-        evidence_count=0,
-        conflict_count=0
+        data=data,
+        db=db
     )
 
 
@@ -86,44 +94,22 @@ def patch_requirement(
     data: RequirementUpdate,
     db: Session = Depends(get_db)
 ):
-    req = db.query(Requirement).filter(Requirement.id == requirement_id).first()
-    if not req:
-        raise NotFoundError("Requirement", requirement_id)
-
-    if data.requirement_text is not None:
-        req.requirement_text = data.requirement_text
-    if data.category is not None:
-        req.category = data.category
-    if data.weight is not None:
-        req.weight = data.weight
-    if data.status is not None:
-        req.status = data.status
-
-    db.commit()
-    db.refresh(req)
-
-    ev_count = db.query(EvidenceLink).filter(EvidenceLink.requirement_id == req.id).count()
-    conf_count = db.query(Contradiction).filter(Contradiction.requirement_id == req.id).count()
-
-    return RequirementResponse(
-        id=req.id,
-        session_id=req.session_id,
-        requirement_text=req.requirement_text,
-        category=req.category,
-        weight=req.weight,
-        status=req.status,
-        order_index=req.order_index,
-        created_at=req.created_at,
-        evidence_count=ev_count,
-        conflict_count=conf_count
+    """
+    Update a requirement's text, question, category, description, importance, priority, or decision-critical status.
+    """
+    return research_planner_service.update_requirement(
+        requirement_id=requirement_id,
+        data=data,
+        db=db
     )
 
 
 @router.delete("/requirements/{requirement_id}", status_code=status.HTTP_200_OK)
 def delete_requirement(requirement_id: str, db: Session = Depends(get_db)):
-    req = db.query(Requirement).filter(Requirement.id == requirement_id).first()
-    if not req:
-        raise NotFoundError("Requirement", requirement_id)
-    db.delete(req)
-    db.commit()
-    return {"success": True, "message": f"Requirement '{requirement_id}' successfully deleted."}
+    """
+    Delete a requirement or suggested question.
+    """
+    return research_planner_service.delete_requirement(
+        requirement_id=requirement_id,
+        db=db
+    )

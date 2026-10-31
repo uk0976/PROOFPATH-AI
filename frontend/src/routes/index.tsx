@@ -4,6 +4,7 @@ import { AppShell } from "@/components/layout/AppShell"
 import { LandingPage } from "@/pages/LandingPage"
 import { DashboardPage } from "@/pages/DashboardPage"
 import { ResearchPage } from "@/pages/ResearchPage"
+import { ResearchPlanPage } from "@/pages/ResearchPlanPage"
 import { InvestigationPage } from "@/pages/InvestigationPage"
 import { InvestigationProgressPage } from "@/pages/InvestigationProgressPage"
 import { IntelligenceDashboardPage } from "@/pages/IntelligenceDashboardPage"
@@ -26,8 +27,10 @@ export const router = createBrowserRouter([
       // 2. Dashboard / My Research
       { path: "dashboard", element: <DashboardPage /> },
 
-      // 3. Research Workspace
+      // 3. Research Workspace & Planner
       { path: "research", element: <ResearchPage /> },
+      { path: "research/:id/plan", element: <ResearchPlanPage /> },
+      { path: "plan/:id", element: <ResearchPlanPage /> },
 
       // 4. Investigation Progress
       { path: "investigation/:id/progress", element: <InvestigationProgressPage /> },

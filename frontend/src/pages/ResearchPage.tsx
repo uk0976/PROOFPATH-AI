@@ -61,6 +61,42 @@ export const ResearchPage: React.FC = () => {
     }
   }
 
+  const handleSaveAndPlan = async () => {
+    if (!title.trim() || !goal.trim()) {
+      setError("Please provide both an investigation title and research goal.")
+      return
+    }
+
+    try {
+      setIsSubmitting(true)
+      setError(null)
+
+      // 1. Create Session
+      const session = await researchService.createSession({
+        title,
+        research_goal: goal,
+        target_decision: decision,
+      })
+
+      // 2. Ingest queued sources if any
+      for (const item of sourcesQueue) {
+        if (item.type === "pdf" && item.file) {
+          await sourceService.uploadPdf(session.id, item.file, item.title)
+        } else if (item.type === "url" && item.url) {
+          await sourceService.addUrl(session.id, item.url, item.title)
+        } else if (item.type === "text" && item.content) {
+          await sourceService.addText(session.id, item.title, item.content)
+        }
+      }
+
+      // 3. Navigate to Research Plan page
+      navigate(`/research/${session.id}/plan`)
+    } catch (err: any) {
+      setError(err.message || "Failed to initiate research planner.")
+      setIsSubmitting(false)
+    }
+  }
+
   const handleSubmit = async () => {
     if (!title.trim() || !goal.trim()) {
       setError("Please provide both an investigation title and research goal.")
@@ -136,6 +172,45 @@ export const ResearchPage: React.FC = () => {
             type="button"
             onClick={() =>
               applyPreset(
+                "Government Postgraduate Scholarship & Grant Application",
+                "I want to apply for a government scholarship. Tell me everything I should know before applying.",
+                "Determine complete qualification and prepare all required documentation prior to deadline."
+              )
+            }
+            className="text-xs bg-white border border-blue-200 hover:border-blue-500 hover:text-blue-700 px-3 py-1.5 rounded-lg text-slate-700 transition-all shadow-xs font-medium"
+          >
+            🎓 Government Scholarship Inquiry
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              applyPreset(
+                "B2B SaaS Commercial Feasibility & Market Opportunity",
+                "Evaluate commercial viability, market opportunity, unit economics and competitors.",
+                "Authorize market entry and go-to-market resource allocation."
+              )
+            }
+            className="text-xs bg-white border border-emerald-200 hover:border-emerald-500 hover:text-emerald-700 px-3 py-1.5 rounded-lg text-slate-700 transition-all shadow-xs font-medium"
+          >
+            💼 Business & Market Feasibility
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              applyPreset(
+                "Public Healthcare & Disability Entitlement Assessment",
+                "Determine entitlement criteria, required documentation proofs, and appeal rights for state disability insurance.",
+                "File formal entitlement claim with certified evidence."
+              )
+            }
+            className="text-xs bg-white border border-purple-200 hover:border-purple-500 hover:text-purple-700 px-3 py-1.5 rounded-lg text-slate-700 transition-all shadow-xs font-medium"
+          >
+            🏛️ Government Services & Benefits
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              applyPreset(
                 "Kubernetes to AWS Serverless Migration Audit",
                 "Evaluate cold-start latency SLAs, concurrency throttling limits, data egress costs, and banking VPC compliance for migrating our payment pipeline.",
                 "Production architectural sign-off for Q3 migration"
@@ -143,20 +218,7 @@ export const ResearchPage: React.FC = () => {
             }
             className="text-xs bg-white border border-slate-200 hover:border-brand hover:text-brand px-3 py-1.5 rounded-lg text-slate-700 transition-all shadow-xs"
           >
-            Serverless vs Kubernetes Migration
-          </button>
-          <button
-            type="button"
-            onClick={() =>
-              applyPreset(
-                "Fintech Vendor SOC2 & Compliance Audit",
-                "Audit vendor documentation for data residency, encryption at rest, GDPR cross-border transfer agreements, and disaster recovery RTO.",
-                "Vendor vendor selection and procurement signoff"
-              )
-            }
-            className="text-xs bg-white border border-slate-200 hover:border-brand hover:text-brand px-3 py-1.5 rounded-lg text-slate-700 transition-all shadow-xs"
-          >
-            Vendor SOC2 & Compliance Audit
+            ⚙️ Serverless vs Kubernetes
           </button>
         </div>
       </div>
@@ -299,13 +361,24 @@ export const ResearchPage: React.FC = () => {
       </div>
 
       {/* Action Footer */}
-      <div className="flex items-center justify-end gap-3 pt-2">
+      <div className="flex flex-wrap items-center justify-end gap-3 pt-2">
+        <Button
+          size="lg"
+          variant="outline"
+          onClick={handleSaveAndPlan}
+          disabled={isSubmitting}
+          className="px-6 font-semibold flex items-center gap-2 bg-white"
+        >
+          <Sparkles className="w-4 h-4 text-blue-600" />
+          <span>Configure Research Plan (AI Planner)</span>
+        </Button>
+
         <Button
           size="lg"
           variant="primary"
           onClick={handleSubmit}
           disabled={isSubmitting}
-          className="px-8 font-semibold"
+          className="px-8 font-semibold flex items-center gap-2"
         >
           {isSubmitting ? (
             <span>Processing Ingestion & Pipeline...</span>

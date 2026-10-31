@@ -469,22 +469,44 @@ class PipelineOrchestrator:
         }
 
     async def _stage_2_question_decomposition(self, session: ResearchSession) -> List[Requirement]:
-        """Stage 2: Decomposes goal into MECE requirements."""
+        """Stage 2: Decomposes goal into MECE requirements or uses user-approved plan."""
+        # 1. If user has already reviewed and approved requirements, respect them!
+        existing_approved = (
+            self.db.query(Requirement)
+            .filter(
+                Requirement.session_id == self.session_id,
+                Requirement.is_approved == True
+            )
+            .order_by(Requirement.order_index)
+            .all()
+        )
+        if existing_approved:
+            logger.info(f"Using {len(existing_approved)} pre-approved research requirements for session {self.session_id}.")
+            return existing_approved
+
+        # 2. Otherwise generate new structured requirements
         planner = ResearchPlannerAgent()
         decomposed_reqs = await planner.decompose_goal(
             goal=session.research_goal,
             target_decision=session.target_decision or ""
         )
 
-        # Clear existing requirements for idempotency
+        # Clear existing unapproved suggestions for idempotency
         self.db.query(Requirement).filter(Requirement.session_id == self.session_id).delete()
         created_reqs = []
         for idx, r_data in enumerate(decomposed_reqs):
             req = Requirement(
                 session_id=self.session_id,
-                requirement_text=r_data["requirement_text"],
-                category=r_data.get("category", "functional"),
+                requirement_text=r_data.get("requirement_text") or r_data.get("question") or "Requirement Criterion",
+                question=r_data.get("question"),
+                category=r_data.get("category", "General"),
+                description=r_data.get("description", ""),
+                importance=r_data.get("importance", "high"),
+                priority=r_data.get("priority", "P1"),
                 weight=float(r_data.get("weight", 1.0)),
+                is_decision_critical=bool(r_data.get("is_decision_critical", False)),
+                origin="ai_suggested",
+                is_approved=True,  # Pipeline execution approves criteria for analysis
                 status="uncovered",
                 order_index=idx
             )
