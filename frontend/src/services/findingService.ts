@@ -17,6 +17,8 @@ export interface FindingsOverview {
   total_conflicts: number
   total_gaps: number
   total_temporal_flags: number
+  counts_by_type?: Record<string, number>
+  findings?: GapFindingItem[]
   contradictions: ContradictionItem[]
   information_gaps: InformationGapItem[]
   temporal_audit: TemporalAuditItem[]

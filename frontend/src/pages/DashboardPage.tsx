@@ -149,9 +149,15 @@ export const DashboardPage: React.FC = () => {
                     </span>
                   </div>
 
+                  <Link to={`/intelligence/${session.id}`}>
+                    <Button variant="primary" size="sm" className="gap-1.5 shadow-subtle">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Intelligence</span>
+                    </Button>
+                  </Link>
                   <Link to={`/investigation/${session.id}`}>
                     <Button variant="secondary" size="sm" className="gap-1.5">
-                      <span>View Audit</span>
+                      <span>Dossier</span>
                       <ArrowRight className="w-3.5 h-3.5" />
                     </Button>
                   </Link>
