@@ -395,6 +395,7 @@ export const VerificationPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => toggleMutation.mutate(task)}
+                      aria-label="Toggle task completion"
                       className="mt-0.5 text-ink-muted hover:text-secondary transition-colors shrink-0"
                       title={task.is_completed ? "Click to Reopen" : "Click to Mark Complete"}
                     >

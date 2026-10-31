@@ -90,6 +90,7 @@ export const Sidebar: React.FC = () => {
             <button
               type="button"
               onClick={closeMobileSidebar}
+              aria-label="Close mobile menu"
               className="text-ink-secondary hover:text-ink hover:bg-background rounded-md p-1 transition-colors"
             >
               <X className="w-4 h-4" />

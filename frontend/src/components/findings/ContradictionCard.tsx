@@ -71,6 +71,8 @@ export const ContradictionCard: React.FC<ContradictionCardProps> = ({ conflict }
 
           <button
             onClick={() => setShowScopeTable(!showScopeTable)}
+            aria-label="Toggle 10 Scope Dimensions"
+            data-testid="toggle-scope-dimensions"
             className="text-xs font-semibold text-secondary hover:text-navy-900 inline-flex items-center gap-1 transition-colors"
           >
             <Scale className="w-3.5 h-3.5" />
