@@ -1,4 +1,14 @@
 /** @type {import('tailwindcss').Config} */
+
+function withOpacity(variableName) {
+  return ({ opacityValue }) => {
+    if (opacityValue !== undefined) {
+      return `rgb(var(${variableName}) / ${opacityValue})`
+    }
+    return `rgb(var(${variableName}))`
+  }
+}
+
 export default {
   darkMode: ["class"],
   content: [
@@ -9,49 +19,49 @@ export default {
     extend: {
       colors: {
         primary: {
-          DEFAULT: "#172B45",
-          hover: "#101F33",
-          light: "#213C5E",
+          DEFAULT: withOpacity("--color-primary"),
+          hover: withOpacity("--color-primary-hover"),
+          light: withOpacity("--color-primary-light"),
         },
         secondary: {
-          DEFAULT: "#315B83",
-          hover: "#264868",
-          light: "#EBF1F7",
+          DEFAULT: withOpacity("--color-secondary"),
+          hover: withOpacity("--color-secondary-hover"),
+          light: withOpacity("--color-secondary-light"),
         },
         background: {
-          DEFAULT: "#F7F8FA",
-          subtle: "#EFF1F5",
+          DEFAULT: withOpacity("--color-background"),
+          subtle: withOpacity("--color-background-subtle"),
         },
         surface: {
-          DEFAULT: "#FFFFFF",
-          muted: "#F9FAFC",
+          DEFAULT: withOpacity("--color-surface"),
+          muted: withOpacity("--color-surface-muted"),
         },
         ink: {
-          DEFAULT: "#202B38", // Primary Text
-          secondary: "#687586", // Secondary Text
-          muted: "#8C9BAE",
-          subtle: "#B0BCCB",
+          DEFAULT: withOpacity("--color-ink"), // Primary Text
+          secondary: withOpacity("--color-ink-secondary"), // Secondary Text
+          muted: withOpacity("--color-ink-muted"),
+          subtle: withOpacity("--color-ink-subtle"),
         },
         border: {
-          DEFAULT: "#E5E9EF",
-          strong: "#CDD4DF",
-          subtle: "#F0F2F6",
+          DEFAULT: withOpacity("--color-border"),
+          strong: withOpacity("--color-border-strong"),
+          subtle: withOpacity("--color-border-subtle"),
         },
         status: {
           success: {
-            DEFAULT: "#23865B",
-            bg: "#EBF6F0",
-            border: "#BCE4CF",
+            DEFAULT: withOpacity("--color-status-success"),
+            bg: withOpacity("--color-status-success-bg"),
+            border: withOpacity("--color-status-success-border"),
           },
           warning: {
-            DEFAULT: "#C28A32",
-            bg: "#FDF7EC",
-            border: "#F5DFB5",
+            DEFAULT: withOpacity("--color-status-warning"),
+            bg: withOpacity("--color-status-warning-bg"),
+            border: withOpacity("--color-status-warning-border"),
           },
           danger: {
-            DEFAULT: "#C65353",
-            bg: "#FDF2F2",
-            border: "#F5C2C2",
+            DEFAULT: withOpacity("--color-status-danger"),
+            bg: withOpacity("--color-status-danger-bg"),
+            border: withOpacity("--color-status-danger-border"),
           },
         },
       },

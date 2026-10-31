@@ -1,17 +1,50 @@
 import React, { useState } from "react"
-import { Settings as SettingsIcon, Key, Cpu, Database, CheckCircle2 } from "lucide-react"
+import {
+  Settings as SettingsIcon,
+  Key,
+  Cpu,
+  Database,
+  CheckCircle2,
+  Sun,
+  Moon,
+  Laptop,
+  Palette,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { useAppStore, ThemeMode } from "@/store/useAppStore"
 
 export const SettingsPage: React.FC = () => {
   const [geminiKey, setGeminiKey] = useState("")
   const [groqKey, setGroqKey] = useState("")
   const [saved, setSaved] = useState(false)
+  const { theme, setTheme } = useAppStore()
 
   const handleSave = () => {
     setSaved(true)
     setTimeout(() => setSaved(false), 3000)
   }
+
+  const themeOptions: { mode: ThemeMode; label: string; desc: string; icon: React.ComponentType<{ className?: string }> }[] = [
+    {
+      mode: "light",
+      label: "Light Mode",
+      desc: "Clean paper white background with high-contrast deep navy ink.",
+      icon: Sun,
+    },
+    {
+      mode: "dark",
+      label: "Dark Mode",
+      desc: "Deep obsidian slate with muted blue accents and reduced eye strain.",
+      icon: Moon,
+    },
+    {
+      mode: "system",
+      label: "System Preference",
+      desc: "Automatically synchronize with your operating system's theme schedule.",
+      icon: Laptop,
+    },
+  ]
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-7">
@@ -22,7 +55,7 @@ export const SettingsPage: React.FC = () => {
           <span>Platform Settings & API Keys</span>
         </h1>
         <p className="text-xs text-ink-secondary mt-1">
-          Configure AI model providers, vector embedding parameters, and backend services.
+          Configure appearance theme, AI model providers, vector embedding parameters, and backend services.
         </p>
       </div>
 
@@ -32,6 +65,60 @@ export const SettingsPage: React.FC = () => {
           <span>Settings saved successfully.</span>
         </div>
       )}
+
+      {/* Appearance & Dark Mode */}
+      <div className="bg-surface border border-border rounded-xl p-6 shadow-card space-y-5">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-bold text-ink uppercase tracking-wider flex items-center gap-2">
+            <Palette className="w-4 h-4 text-secondary" />
+            <span>Theme & Display Mode</span>
+          </h2>
+          <Badge variant="outline" className="text-[10px] uppercase font-mono">
+            {theme} active
+          </Badge>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {themeOptions.map((opt) => {
+            const Icon = opt.icon
+            const isSelected = theme === opt.mode
+
+            return (
+              <button
+                key={opt.mode}
+                type="button"
+                onClick={() => setTheme(opt.mode)}
+                className={`p-4 rounded-xl border text-left transition-all flex flex-col justify-between space-y-3 ${
+                  isSelected
+                    ? "border-secondary bg-secondary-light/40 shadow-sm"
+                    : "border-border bg-background/50 hover:bg-background hover:border-border-strong"
+                }`}
+              >
+                <div className="flex items-center justify-between w-full">
+                  <div
+                    className={`p-2 rounded-lg ${
+                      isSelected
+                        ? "bg-secondary text-white"
+                        : "bg-surface border border-border text-ink-secondary"
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  {isSelected && (
+                    <span className="w-2 h-2 rounded-full bg-secondary" />
+                  )}
+                </div>
+                <div>
+                  <h3 className="text-xs font-bold text-ink">{opt.label}</h3>
+                  <p className="text-[11px] text-ink-muted mt-1 leading-snug">
+                    {opt.desc}
+                  </p>
+                </div>
+              </button>
+            )
+          })}
+        </div>
+      </div>
 
       {/* Model Providers */}
       <div className="bg-surface border border-border rounded-xl p-6 shadow-card space-y-5">

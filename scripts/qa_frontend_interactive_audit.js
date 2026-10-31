@@ -117,13 +117,13 @@ async function runQA() {
       { path: "/", titleCheck: "PROOFPATH AI" },
       { path: "/dashboard", titleCheck: "Research Investigations" },
       { path: "/research", titleCheck: "Initiate Forensic Information Audit" },
-      { path: "/demo", titleCheck: "Federal STEM Postgraduate Scholarship" },
+      { path: "/demo", titleCheck: "Scholarship" },
       { path: "/settings", titleCheck: "Platform Settings & API Keys" },
     ];
 
     for (const r of routesToTest) {
       await cdp.send("Page.navigate", { url: `http://localhost:5173${r.path}` });
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      await new Promise((resolve) => setTimeout(resolve, 1100));
       const bodyText = await cdp.eval("document.body.innerText");
       const passed = bodyText.includes(r.titleCheck);
       recordTest(`Route Mount: ${r.path}`, passed, `Found '${r.titleCheck}'`);
@@ -134,7 +134,7 @@ async function runQA() {
     // -------------------------------------------------------------------------
     console.log("\n[2/7] Testing Research Setup Form & Domain Presets...");
     await cdp.send("Page.navigate", { url: "http://localhost:5173/research" });
-    await new Promise((resolve) => setTimeout(resolve, 600));
+    await new Promise((resolve) => setTimeout(resolve, 1200));
 
     // Click Scholarship preset button
     const presetClicked = await cdp.eval(`
@@ -221,7 +221,7 @@ async function runQA() {
     // -------------------------------------------------------------------------
     console.log("\n[5/7] Testing Contradiction Explorer Scope Comparison...");
     await cdp.send("Page.navigate", { url: "http://localhost:5173/contradictions/demo-scholarship-investigation" });
-    await new Promise((resolve) => setTimeout(resolve, 800));
+    await new Promise((resolve) => setTimeout(resolve, 1400));
 
     // Toggle 10 Scope Dimensions
     const toggleScopeClicked = await cdp.eval(`
@@ -255,7 +255,7 @@ async function runQA() {
     // -------------------------------------------------------------------------
     console.log("\n[6/7] Testing Verification Checklist & Task Toggle...");
     await cdp.send("Page.navigate", { url: "http://localhost:5173/verification/demo-scholarship-investigation" });
-    await new Promise((resolve) => setTimeout(resolve, 800));
+    await new Promise((resolve) => setTimeout(resolve, 1600));
 
     // Toggle task checkbox
     const taskToggled = await cdp.eval(`

@@ -19,6 +19,8 @@ import {
   Scale,
   Layers,
   X,
+  Sun,
+  Moon,
 } from "lucide-react"
 import { useAppStore } from "@/store/useAppStore"
 import { DEMO_SESSION_ID } from "@/utils/sampleData"
@@ -31,7 +33,15 @@ export const Sidebar: React.FC = () => {
     toggleSidebar,
     mobileSidebarOpen,
     closeMobileSidebar,
+    theme,
+    toggleTheme,
   } = useAppStore()
+
+  const isDark =
+    theme === "dark" ||
+    (theme === "system" &&
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches)
 
   // Use current session ID from URL or fallback to demo session
   const activeSessionId = id || DEMO_SESSION_ID
@@ -183,29 +193,47 @@ export const Sidebar: React.FC = () => {
         </div>
       </div>
 
-      {/* Footer / Settings Link */}
+      {/* Footer / Settings & Theme Link */}
       <div className="p-3 border-t border-border space-y-1">
-        <NavLink
-          to="/settings"
-          onClick={() => isMobileView && closeMobileSidebar()}
-          title="Settings"
-          className={({ isActive }) =>
-            `flex items-center space-x-2.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors ${
-              isActive
-                ? "bg-secondary-light/70 text-secondary font-semibold"
-                : "text-ink-secondary hover:bg-background hover:text-ink"
-            }`
-          }
-        >
-          <Settings className="w-4 h-4 shrink-0 text-ink-secondary" />
-          {(sidebarOpen || isMobileView) && <span className="truncate">Settings</span>}
-        </NavLink>
+        <div className="flex items-center justify-between">
+          <NavLink
+            to="/settings"
+            onClick={() => isMobileView && closeMobileSidebar()}
+            title="Settings"
+            className={({ isActive }) =>
+              `flex items-center space-x-2.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors flex-1 ${
+                isActive
+                  ? "bg-secondary-light/70 text-secondary font-semibold"
+                  : "text-ink-secondary hover:bg-background hover:text-ink"
+              }`
+            }
+          >
+            <Settings className="w-4 h-4 shrink-0 text-ink-secondary" />
+            {(sidebarOpen || isMobileView) && <span className="truncate">Settings</span>}
+          </NavLink>
+
+          {(sidebarOpen || isMobileView) && (
+            <button
+              type="button"
+              onClick={toggleTheme}
+              aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+              title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+              className="p-1.5 text-ink-secondary hover:text-ink hover:bg-background rounded-md transition-colors ml-1"
+            >
+              {isDark ? (
+                <Sun className="w-3.5 h-3.5 text-amber-400" />
+              ) : (
+                <Moon className="w-3.5 h-3.5 text-ink-secondary" />
+              )}
+            </button>
+          )}
+        </div>
 
         {(sidebarOpen || isMobileView) && (
           <div className="px-2 pt-1.5 text-[10px] text-ink-muted flex items-center justify-between">
             <span>PROOFPATH v2.0</span>
             <span className="font-mono text-[9px] bg-background px-1.5 py-0.5 rounded border border-border">
-              READY
+              {isDark ? "DARK" : "LIGHT"}
             </span>
           </div>
         )}
