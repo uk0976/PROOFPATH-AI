@@ -29,7 +29,7 @@ import { researchService } from "@/services/researchService"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { BlindSpotItem, BlindSpotSourceReference } from "@/types"
-import { SAMPLE_SESSION_DETAIL, SAMPLE_BLINDSPOTS } from "@/utils/sampleData"
+import { SAMPLE_SESSION_DETAIL, SAMPLE_BLINDSPOTS, DEMO_SESSION_ID } from "@/utils/sampleData"
 
 export const BlindSpotPage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -44,7 +44,13 @@ export const BlindSpotPage: React.FC = () => {
   const { data: session } = useQuery({
     queryKey: ["session", id],
     queryFn: async () => {
-      if (id === "demo") return SAMPLE_SESSION_DETAIL
+      if (id === "demo" || id === DEMO_SESSION_ID) {
+        try {
+          return await researchService.getSession(id!)
+        } catch {
+          return SAMPLE_SESSION_DETAIL
+        }
+      }
       return await researchService.getSession(id!)
     },
     enabled: !!id,
@@ -58,7 +64,13 @@ export const BlindSpotPage: React.FC = () => {
   } = useQuery({
     queryKey: ["blindspots", id],
     queryFn: async () => {
-      if (id === "demo") return SAMPLE_BLINDSPOTS
+      if (id === "demo" || id === DEMO_SESSION_ID) {
+        try {
+          return await reportService.getBlindspots(id!, { include_dismissed: true })
+        } catch {
+          return SAMPLE_BLINDSPOTS
+        }
+      }
       return await reportService.getBlindspots(id!, { include_dismissed: true })
     },
     enabled: !!id,

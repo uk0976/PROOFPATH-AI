@@ -51,12 +51,24 @@ export const DashboardPage: React.FC = () => {
             Forensic dossiers, cross-source conflict audits, and decision-readiness indices.
           </p>
         </div>
-        <Link to="/research">
-          <Button variant="primary" size="md">
-            <Plus className="w-4 h-4" />
-            <span>New Investigation</span>
-          </Button>
-        </Link>
+        <div className="flex items-center space-x-2.5">
+          <Link to="/demo">
+            <Button
+              variant="outline"
+              size="md"
+              className="border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 font-medium"
+            >
+              <Sparkles className="w-4 h-4 text-amber-600 mr-1.5" />
+              <span>Explore Demo Mode</span>
+            </Button>
+          </Link>
+          <Link to="/research">
+            <Button variant="primary" size="md">
+              <Plus className="w-4 h-4 mr-1.5" />
+              <span>New Investigation</span>
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Search Bar */}

@@ -161,6 +161,13 @@ def _build_contradiction_response(c: Contradiction) -> ContradictionResponse:
 async def get_all_research_findings(research_id: str, db: Session = Depends(get_db)):
     """Retrieves all findings, contradictions, and 6-category gap analyses for a session."""
     session = db.query(ResearchSession).filter(ResearchSession.id == research_id).first()
+    if not session and research_id in ["demo", "demo-scholarship-investigation"]:
+        from app.utils.mock_data import seed_demo_investigation
+        seed_demo_investigation(db)
+        session = db.query(ResearchSession).filter(
+            ResearchSession.id.in_(["demo", "demo-scholarship-investigation"])
+        ).first()
+
     if not session:
         raise NotFoundError("ResearchSession", research_id)
 
@@ -258,6 +265,13 @@ def get_findings_gaps(
 ):
     """Retrieves gap findings with optional filtering by finding category."""
     session = db.query(ResearchSession).filter(ResearchSession.id == research_id).first()
+    if not session and research_id in ["demo", "demo-scholarship-investigation"]:
+        from app.utils.mock_data import seed_demo_investigation
+        seed_demo_investigation(db)
+        session = db.query(ResearchSession).filter(
+            ResearchSession.id.in_(["demo", "demo-scholarship-investigation"])
+        ).first()
+
     if not session:
         raise NotFoundError("ResearchSession", research_id)
 
@@ -284,6 +298,13 @@ def get_findings_conflicts(
 ):
     """Retrieves all cross-source contradictions and scope comparisons for a session."""
     session = db.query(ResearchSession).filter(ResearchSession.id == research_id).first()
+    if not session and research_id in ["demo", "demo-scholarship-investigation"]:
+        from app.utils.mock_data import seed_demo_investigation
+        seed_demo_investigation(db)
+        session = db.query(ResearchSession).filter(
+            ResearchSession.id.in_(["demo", "demo-scholarship-investigation"])
+        ).first()
+
     if not session:
         raise NotFoundError("ResearchSession", research_id)
 

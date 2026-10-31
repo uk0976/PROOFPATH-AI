@@ -40,9 +40,10 @@ export const LandingPage: React.FC = () => {
               <ArrowRight className="w-4 h-4" />
             </Button>
           </Link>
-          <Link to="/dashboard">
-            <Button size="lg" variant="secondary" className="gap-2 px-6">
-              <span>Explore Demo Dossier</span>
+          <Link to="/demo">
+            <Button size="lg" variant="outline" className="gap-2 px-6 border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100 font-medium">
+              <Sparkles className="w-4 h-4 text-amber-600" />
+              <span>Explore Demo Mode</span>
             </Button>
           </Link>
         </div>

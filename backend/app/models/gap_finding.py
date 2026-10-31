@@ -25,5 +25,5 @@ class GapFinding(BaseModel):
     limitations = Column(Text, nullable=False)
 
     # Relationships
-    session = relationship("ResearchSession", backref="gap_findings")
+    session = relationship("ResearchSession", back_populates="gap_findings")
     requirement = relationship("Requirement", backref="gap_findings")

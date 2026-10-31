@@ -16,6 +16,7 @@ import { BlindSpotPage } from "@/pages/BlindSpotPage"
 import { VerificationPage } from "@/pages/VerificationPage"
 import { ReportPage } from "@/pages/ReportPage"
 import { SettingsPage } from "@/pages/SettingsPage"
+import { DemoPage } from "@/pages/DemoPage"
 
 export const router = createBrowserRouter([
   {
@@ -24,6 +25,9 @@ export const router = createBrowserRouter([
     children: [
       // 1. Landing Page
       { index: true, element: <LandingPage /> },
+
+      // 1b. Dedicated Demo Mode Entry
+      { path: "demo", element: <DemoPage /> },
 
       // 2. Dashboard / My Research
       { path: "dashboard", element: <DashboardPage /> },

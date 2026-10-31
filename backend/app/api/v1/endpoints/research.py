@@ -71,6 +71,13 @@ def list_research(db: Session = Depends(get_db)):
 @router.get("/research/{research_id}", response_model=ResearchSessionResponse)
 def get_research(research_id: str, db: Session = Depends(get_db)):
     session = db.query(ResearchSession).filter(ResearchSession.id == research_id).first()
+    if not session and research_id in ["demo", "demo-scholarship-investigation"]:
+        from app.utils.mock_data import seed_demo_investigation
+        seed_demo_investigation(db)
+        session = db.query(ResearchSession).filter(
+            ResearchSession.id.in_(["demo", "demo-scholarship-investigation"])
+        ).first()
+
     if not session:
         raise NotFoundError("ResearchSession", research_id)
     return session

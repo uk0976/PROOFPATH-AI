@@ -34,6 +34,7 @@ export const Sidebar: React.FC = () => {
     { label: "Overview", path: "/dashboard", icon: LayoutDashboard },
     { label: "New Investigation", path: "/research", icon: PlusCircle },
     { label: "My Research", path: "/dashboard", icon: FolderKanban },
+    { label: "Demo Mode", path: "/demo", icon: Sparkles, badge: "SAMPLE" },
   ]
 
   const forensicNavItems = [
@@ -106,8 +107,17 @@ export const Sidebar: React.FC = () => {
                     : "text-ink-secondary hover:bg-background hover:text-ink"
                 }`}
               >
-                <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-secondary" : "text-ink-secondary"}`} />
-                {sidebarOpen && <span className="truncate">{item.label}</span>}
+                <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-secondary" : item.badge ? "text-amber-600" : "text-ink-secondary"}`} />
+                {sidebarOpen && (
+                  <div className="flex items-center justify-between flex-1 overflow-hidden">
+                    <span className="truncate">{item.label}</span>
+                    {item.badge && (
+                      <span className="font-mono text-[9px] bg-amber-100 text-amber-900 border border-amber-300 font-bold px-1.5 py-0.5 rounded shrink-0 ml-1">
+                        {item.badge}
+                      </span>
+                    )}
+                  </div>
+                )}
               </NavLink>
             )
           })}

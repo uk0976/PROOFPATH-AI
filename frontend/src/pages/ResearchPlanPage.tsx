@@ -30,6 +30,7 @@ import { Badge } from "@/components/ui/badge"
 import { AddRequirementModal } from "@/components/research/AddRequirementModal"
 import { EditRequirementModal } from "@/components/research/EditRequirementModal"
 import { cn } from "@/utils/cn"
+import { DEMO_SESSION_ID, SAMPLE_SESSION_DETAIL, SAMPLE_REQUIREMENTS } from "@/utils/sampleData"
 
 export const ResearchPlanPage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -46,14 +47,40 @@ export const ResearchPlanPage: React.FC = () => {
   // Query Research Session
   const { data: session } = useQuery({
     queryKey: ["session", id],
-    queryFn: () => researchService.getSession(id!),
+    queryFn: async () => {
+      if (id === "demo" || id === DEMO_SESSION_ID) {
+        try {
+          return await researchService.getSession(id!)
+        } catch {
+          return SAMPLE_SESSION_DETAIL
+        }
+      }
+      return researchService.getSession(id!)
+    },
     enabled: !!id,
   })
 
   // Query Research Plan
   const { data: plan, isLoading, error: planError } = useQuery({
     queryKey: ["researchPlan", id],
-    queryFn: () => planService.getPlan(id!),
+    queryFn: async () => {
+      if (id === "demo" || id === DEMO_SESSION_ID) {
+        try {
+          return await planService.getPlan(id!)
+        } catch {
+          return {
+            session_id: DEMO_SESSION_ID,
+            total_requirements: SAMPLE_REQUIREMENTS.length,
+            official_approved_count: SAMPLE_REQUIREMENTS.length,
+            ai_suggested_count: 0,
+            decision_critical_count: 4,
+            categories: ["academic", "eligibility", "financial", "documentation", "insurance"],
+            requirements: SAMPLE_REQUIREMENTS,
+          }
+        }
+      }
+      return planService.getPlan(id!)
+    },
     enabled: !!id,
   })
 

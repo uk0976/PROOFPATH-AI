@@ -31,7 +31,7 @@ import { ReactFlowCanvas } from "@/components/graph/ReactFlowCanvas"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { AtomicClaimItem, SourceItem } from "@/types"
-import { SAMPLE_GRAPH_DATA } from "@/utils/sampleData"
+import { SAMPLE_GRAPH_DATA, DEMO_SESSION_ID, SAMPLE_CLAIMS } from "@/utils/sampleData"
 import { formatDate } from "@/utils/formatters"
 
 const CATEGORIES = [
@@ -69,7 +69,17 @@ export const EvidenceExplorerPage: React.FC = () => {
   // Queries
   const { data: claims, isLoading: claimsLoading, refetch: refetchClaims } = useQuery({
     queryKey: ["claims", id],
-    queryFn: () => findingService.getClaims(id!),
+    queryFn: async () => {
+      if (id === "demo" || id === DEMO_SESSION_ID) {
+        try {
+          const res = await findingService.getClaims(id!)
+          return res.length > 0 ? res : SAMPLE_CLAIMS
+        } catch {
+          return SAMPLE_CLAIMS
+        }
+      }
+      return await findingService.getClaims(id!)
+    },
     enabled: !!id,
   })
 
@@ -82,7 +92,13 @@ export const EvidenceExplorerPage: React.FC = () => {
   const { data: graphData, isLoading: graphLoading } = useQuery({
     queryKey: ["graph", id],
     queryFn: async () => {
-      if (id === "demo") return SAMPLE_GRAPH_DATA
+      if (id === "demo" || id === DEMO_SESSION_ID) {
+        try {
+          return await findingService.getEvidenceGraph(id!)
+        } catch {
+          return SAMPLE_GRAPH_DATA
+        }
+      }
       return await findingService.getEvidenceGraph(id!)
     },
     enabled: !!id && activeTab === "graph",

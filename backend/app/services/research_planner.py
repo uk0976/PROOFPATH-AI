@@ -31,6 +31,13 @@ class ResearchPlannerService:
         Deduplicates questions and saves them to SQLite with origin='ai_suggested' and is_approved=False.
         """
         session = db.query(ResearchSession).filter(ResearchSession.id == session_id).first()
+        if not session and session_id in ["demo", "demo-scholarship-investigation"]:
+            from app.utils.mock_data import seed_demo_investigation
+            seed_demo_investigation(db)
+            session = db.query(ResearchSession).filter(
+                ResearchSession.id.in_(["demo", "demo-scholarship-investigation"])
+            ).first()
+
         if not session:
             raise NotFoundError("ResearchSession", session_id)
 
@@ -104,6 +111,13 @@ class ResearchPlannerService:
         Retrieves the complete research plan with categories and summary metrics.
         """
         session = db.query(ResearchSession).filter(ResearchSession.id == session_id).first()
+        if not session and session_id in ["demo", "demo-scholarship-investigation"]:
+            from app.utils.mock_data import seed_demo_investigation
+            seed_demo_investigation(db)
+            session = db.query(ResearchSession).filter(
+                ResearchSession.id.in_(["demo", "demo-scholarship-investigation"])
+            ).first()
+
         if not session:
             raise NotFoundError("ResearchSession", session_id)
 
@@ -166,6 +180,13 @@ class ResearchPlannerService:
         Adds an explicit user-requested requirement (origin='user_requested', is_approved=True).
         """
         session = db.query(ResearchSession).filter(ResearchSession.id == session_id).first()
+        if not session and session_id in ["demo", "demo-scholarship-investigation"]:
+            from app.utils.mock_data import seed_demo_investigation
+            seed_demo_investigation(db)
+            session = db.query(ResearchSession).filter(
+                ResearchSession.id.in_(["demo", "demo-scholarship-investigation"])
+            ).first()
+
         if not session:
             raise NotFoundError("ResearchSession", session_id)
 
@@ -292,6 +313,13 @@ class ResearchPlannerService:
         Approves AI-suggested requirements, elevating them to official requirements for the investigation.
         """
         session = db.query(ResearchSession).filter(ResearchSession.id == session_id).first()
+        if not session and session_id in ["demo", "demo-scholarship-investigation"]:
+            from app.utils.mock_data import seed_demo_investigation
+            seed_demo_investigation(db)
+            session = db.query(ResearchSession).filter(
+                ResearchSession.id.in_(["demo", "demo-scholarship-investigation"])
+            ).first()
+
         if not session:
             raise NotFoundError("ResearchSession", session_id)
 

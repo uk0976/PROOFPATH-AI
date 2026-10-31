@@ -9,6 +9,7 @@ from app.api.v1.endpoints import (
     blindspots,
     verification,
     reports,
+    demo,
 )
 
 api_router = APIRouter()
@@ -39,3 +40,6 @@ api_router.include_router(verification.router)
 
 # 9. Reports
 api_router.include_router(reports.router)
+
+# 10. Demo Mode
+api_router.include_router(demo.router)

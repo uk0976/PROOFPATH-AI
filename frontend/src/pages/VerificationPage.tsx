@@ -32,7 +32,7 @@ import {
 import { researchService } from "@/services/researchService"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { SAMPLE_VERIFICATION_TASKS } from "@/utils/sampleData"
+import { SAMPLE_VERIFICATION_TASKS, DEMO_SESSION_ID, SAMPLE_SESSION_DETAIL } from "@/utils/sampleData"
 
 export const VerificationPage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -56,9 +56,15 @@ export const VerificationPage: React.FC = () => {
   // Fetch session
   const { data: session } = useQuery({
     queryKey: ["session", id],
-    queryFn: () => {
-      if (!id || id === "demo") return null
-      return researchService.getSession(id)
+    queryFn: async () => {
+      if (!id || id === "demo" || id === DEMO_SESSION_ID) {
+        try {
+          return await researchService.getSession(id || DEMO_SESSION_ID)
+        } catch {
+          return SAMPLE_SESSION_DETAIL
+        }
+      }
+      return await researchService.getSession(id)
     },
     enabled: !!id,
   })
@@ -67,7 +73,13 @@ export const VerificationPage: React.FC = () => {
   const { data: tasks, isLoading, refetch: refetchTasks } = useQuery({
     queryKey: ["verification", id],
     queryFn: async () => {
-      if (!id || id === "demo") return SAMPLE_VERIFICATION_TASKS
+      if (!id || id === "demo" || id === DEMO_SESSION_ID) {
+        try {
+          return await reportService.getVerification(id || DEMO_SESSION_ID)
+        } catch {
+          return SAMPLE_VERIFICATION_TASKS
+        }
+      }
       return await reportService.getVerification(id)
     },
     enabled: !!id,

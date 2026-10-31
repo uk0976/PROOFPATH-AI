@@ -50,6 +50,13 @@ async def upload_source_file(
 ):
     """Uploads and processes a single PDF document with text/scanned extraction and page tracking."""
     session = db.query(ResearchSession).filter(ResearchSession.id == research_id).first()
+    if not session and research_id in ["demo", "demo-scholarship-investigation"]:
+        from app.utils.mock_data import seed_demo_investigation
+        seed_demo_investigation(db)
+        session = db.query(ResearchSession).filter(
+            ResearchSession.id.in_(["demo", "demo-scholarship-investigation"])
+        ).first()
+
     if not session:
         raise NotFoundError("ResearchSession", research_id)
 
@@ -82,6 +89,13 @@ async def upload_multiple_source_files(
 ):
     """Uploads and ingests multiple PDF documents in a single batch request."""
     session = db.query(ResearchSession).filter(ResearchSession.id == research_id).first()
+    if not session and research_id in ["demo", "demo-scholarship-investigation"]:
+        from app.utils.mock_data import seed_demo_investigation
+        seed_demo_investigation(db)
+        session = db.query(ResearchSession).filter(
+            ResearchSession.id.in_(["demo", "demo-scholarship-investigation"])
+        ).first()
+
     if not session:
         raise NotFoundError("ResearchSession", research_id)
 
@@ -197,6 +211,13 @@ async def retry_source(
 def get_research_sources(research_id: str, db: Session = Depends(get_db)):
     """Retrieves all sources attached to a given research session."""
     session = db.query(ResearchSession).filter(ResearchSession.id == research_id).first()
+    if not session and research_id in ["demo", "demo-scholarship-investigation"]:
+        from app.utils.mock_data import seed_demo_investigation
+        seed_demo_investigation(db)
+        session = db.query(ResearchSession).filter(
+            ResearchSession.id.in_(["demo", "demo-scholarship-investigation"])
+        ).first()
+
     if not session:
         raise NotFoundError("ResearchSession", research_id)
 

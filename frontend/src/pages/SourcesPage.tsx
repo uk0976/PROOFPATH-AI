@@ -29,6 +29,7 @@ import { SourceItem, SourceChunkItem } from "@/types"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { formatDate } from "@/utils/formatters"
+import { DEMO_SESSION_ID, SAMPLE_SOURCES } from "@/utils/sampleData"
 
 export const SourcesPage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -63,7 +64,16 @@ export const SourcesPage: React.FC = () => {
   // Queries
   const { data: sources, isLoading } = useQuery({
     queryKey: ["sources", id],
-    queryFn: () => sourceService.listSources(id!),
+    queryFn: async () => {
+      if (id === "demo" || id === DEMO_SESSION_ID) {
+        try {
+          return await sourceService.listSources(id!)
+        } catch {
+          return SAMPLE_SOURCES
+        }
+      }
+      return await sourceService.listSources(id!)
+    },
     enabled: !!id,
     refetchInterval: (query) => {
       // Auto-poll if any source is in pending or processing state

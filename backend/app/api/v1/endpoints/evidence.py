@@ -27,6 +27,13 @@ router = APIRouter(tags=["Evidence"])
 @router.get("/research/{research_id}/evidence", response_model=MatrixViewResponse)
 def get_research_evidence_matrix(research_id: str, db: Session = Depends(get_db)):
     session = db.query(ResearchSession).filter(ResearchSession.id == research_id).first()
+    if not session and research_id in ["demo", "demo-scholarship-investigation"]:
+        from app.utils.mock_data import seed_demo_investigation
+        seed_demo_investigation(db)
+        session = db.query(ResearchSession).filter(
+            ResearchSession.id.in_(["demo", "demo-scholarship-investigation"])
+        ).first()
+
     if not session:
         raise NotFoundError("ResearchSession", research_id)
 
@@ -95,6 +102,13 @@ def get_research_evidence_matrix(research_id: str, db: Session = Depends(get_db)
 @router.get("/evidence/{research_id}/graph", response_model=EvidenceGraphResponse)
 def get_research_evidence_graph(research_id: str, db: Session = Depends(get_db)):
     session = db.query(ResearchSession).filter(ResearchSession.id == research_id).first()
+    if not session and research_id in ["demo", "demo-scholarship-investigation"]:
+        from app.utils.mock_data import seed_demo_investigation
+        seed_demo_investigation(db)
+        session = db.query(ResearchSession).filter(
+            ResearchSession.id.in_(["demo", "demo-scholarship-investigation"])
+        ).first()
+
     if not session:
         raise NotFoundError("ResearchSession", research_id)
 
@@ -126,6 +140,13 @@ def trigger_evidence_retrieval(
     """Executes FAISS indexing, hybrid semantic/keyword search, and requirement-to-claim mapping."""
     from app.intelligence.evidence_retrieval_engine import EvidenceRetrievalEngine
     session = db.query(ResearchSession).filter(ResearchSession.id == research_id).first()
+    if not session and research_id in ["demo", "demo-scholarship-investigation"]:
+        from app.utils.mock_data import seed_demo_investigation
+        seed_demo_investigation(db)
+        session = db.query(ResearchSession).filter(
+            ResearchSession.id.in_(["demo", "demo-scholarship-investigation"])
+        ).first()
+
     if not session:
         raise NotFoundError("ResearchSession", research_id)
 

@@ -29,7 +29,7 @@ import { ContradictionCard } from "@/components/findings/ContradictionCard"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ContradictionItem, TemporalAuditItem, TemporalAuditOverviewData } from "@/types"
-import { SAMPLE_SESSION_DETAIL, SAMPLE_CONFLICTS } from "@/utils/sampleData"
+import { SAMPLE_SESSION_DETAIL, SAMPLE_CONFLICTS, DEMO_SESSION_ID } from "@/utils/sampleData"
 
 export const ContradictionExplorerPage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -45,7 +45,13 @@ export const ContradictionExplorerPage: React.FC = () => {
   const { data: session } = useQuery({
     queryKey: ["session", id],
     queryFn: async () => {
-      if (id === "demo") return SAMPLE_SESSION_DETAIL
+      if (id === "demo" || id === DEMO_SESSION_ID) {
+        try {
+          return await researchService.getSession(id!)
+        } catch {
+          return SAMPLE_SESSION_DETAIL
+        }
+      }
       return await researchService.getSession(id!)
     },
     enabled: !!id,
@@ -59,7 +65,13 @@ export const ContradictionExplorerPage: React.FC = () => {
   } = useQuery({
     queryKey: ["contradictions", id],
     queryFn: async () => {
-      if (id === "demo") return SAMPLE_CONFLICTS
+      if (id === "demo" || id === DEMO_SESSION_ID) {
+        try {
+          return await findingService.getConflicts(id!)
+        } catch {
+          return SAMPLE_CONFLICTS
+        }
+      }
       return await findingService.getConflicts(id!)
     },
     enabled: !!id,
@@ -73,17 +85,34 @@ export const ContradictionExplorerPage: React.FC = () => {
   } = useQuery({
     queryKey: ["temporal-audit", id],
     queryFn: async () => {
-      if (id === "demo") {
-        return {
-          research_id: "demo",
-          total_sources: 2,
-          active_sources: 1,
-          superseded_sources: 0,
-          expired_sources: 0,
-          differing_cycle_sources: 0,
-          missing_metadata_sources: 0,
-          audits: [],
-        } as TemporalAuditOverviewData
+      if (id === "demo" || id === DEMO_SESSION_ID) {
+        try {
+          return await findingService.getForensicTemporalAudit(id!)
+        } catch {
+          return {
+            research_id: DEMO_SESSION_ID,
+            total_sources: 3,
+            active_sources: 2,
+            superseded_sources: 1,
+            expired_sources: 0,
+            differing_cycle_sources: 0,
+            missing_metadata_sources: 0,
+            audits: [
+              {
+                source_id: "demo-src-3",
+                source_title: "[SAMPLE DATA] 2023 National Student Assistance Circular (Superseded Text)",
+                source_type: "text",
+                publication_date: "2023-08-01T00:00:00Z",
+                status: "SUPERSEDED",
+                applicability_verdict: "Superseded by 2026 guidelines",
+                decay_risk: "medium",
+                rationale: "August 2023 circular specifies a superseded $65,000 threshold that was replaced by 2026 statutory guidelines ($75,000).",
+                recommended_action: "Confirm current financial eligibility using 2026 guidelines.",
+                stale_claims: [],
+              } as TemporalAuditItem,
+            ],
+          } as TemporalAuditOverviewData
+        }
       }
       return await findingService.getForensicTemporalAudit(id!)
     },

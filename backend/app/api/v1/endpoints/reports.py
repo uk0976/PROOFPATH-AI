@@ -135,8 +135,12 @@ def download_pdf_dossier(research_id: str, db: Session = Depends(get_db)):
         report = db.query(ReportDossier).filter(ReportDossier.id == research_id).first()
         if report:
             session = db.query(ResearchSession).filter(ResearchSession.id == report.session_id).first()
-        elif research_id == "demo":
-            session = db.query(ResearchSession).first()
+        elif research_id in ["demo", "demo-scholarship-investigation"]:
+            from app.utils.mock_data import seed_demo_investigation
+            seed_demo_investigation(db)
+            session = db.query(ResearchSession).filter(
+                ResearchSession.id.in_(["demo", "demo-scholarship-investigation"])
+            ).first()
         if not session:
             raise NotFoundError("ResearchSession or Report", research_id)
 

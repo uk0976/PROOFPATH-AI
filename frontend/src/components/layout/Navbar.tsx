@@ -23,6 +23,13 @@ export const Navbar: React.FC = () => {
         {/* Right Actions */}
         <div className="flex items-center space-x-3">
           <Link
+            to="/demo"
+            className="flex items-center space-x-1.5 text-xs text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-300 font-medium px-2.5 py-1 rounded-md transition-colors shadow-2xs"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+            <span>Demo Mode</span>
+          </Link>
+          <Link
             to="/dashboard"
             className="text-xs text-ink-secondary hover:text-ink font-medium px-2 py-1 rounded hover:bg-background transition-colors"
           >

@@ -68,6 +68,13 @@ def get_research_verification_tasks(
     If no tasks exist yet, generates them automatically from current findings and contradictions.
     """
     session = db.query(ResearchSession).filter(ResearchSession.id == research_id).first()
+    if not session and research_id in ["demo", "demo-scholarship-investigation"]:
+        from app.utils.mock_data import seed_demo_investigation
+        seed_demo_investigation(db)
+        session = db.query(ResearchSession).filter(
+            ResearchSession.id.in_(["demo", "demo-scholarship-investigation"])
+        ).first()
+
     if not session:
         raise NotFoundError("ResearchSession", research_id)
 
@@ -100,6 +107,13 @@ def create_custom_verification_task(
 ):
     """Adds a custom user-defined verification task to the investigation."""
     session = db.query(ResearchSession).filter(ResearchSession.id == research_id).first()
+    if not session and research_id in ["demo", "demo-scholarship-investigation"]:
+        from app.utils.mock_data import seed_demo_investigation
+        seed_demo_investigation(db)
+        session = db.query(ResearchSession).filter(
+            ResearchSession.id.in_(["demo", "demo-scholarship-investigation"])
+        ).first()
+
     if not session:
         raise NotFoundError("ResearchSession", research_id)
 
@@ -129,6 +143,13 @@ def regenerate_verification_tasks(
 ):
     """Regenerates/syncs verification tasks from latest findings and contradictions."""
     session = db.query(ResearchSession).filter(ResearchSession.id == research_id).first()
+    if not session and research_id in ["demo", "demo-scholarship-investigation"]:
+        from app.utils.mock_data import seed_demo_investigation
+        seed_demo_investigation(db)
+        session = db.query(ResearchSession).filter(
+            ResearchSession.id.in_(["demo", "demo-scholarship-investigation"])
+        ).first()
+
     if not session:
         raise NotFoundError("ResearchSession", research_id)
 

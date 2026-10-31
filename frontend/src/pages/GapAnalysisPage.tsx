@@ -29,6 +29,7 @@ import { findingService } from "@/services/findingService"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { GapFindingItem, EvidenceReferenceItem } from "@/types"
+import { DEMO_SESSION_ID, SAMPLE_GAP_FINDINGS } from "@/utils/sampleData"
 
 // The 6 canonical finding categories
 const FINDING_TYPES = [
@@ -55,7 +56,16 @@ export const GapAnalysisPage: React.FC = () => {
   // Query findings
   const { data: findings, isLoading, refetch } = useQuery({
     queryKey: ["gap-findings", id],
-    queryFn: () => findingService.getGapFindings(id!),
+    queryFn: async () => {
+      if (id === "demo" || id === DEMO_SESSION_ID) {
+        try {
+          return await findingService.getGapFindings(id!)
+        } catch {
+          return SAMPLE_GAP_FINDINGS
+        }
+      }
+      return await findingService.getGapFindings(id!)
+    },
     enabled: !!id,
   })
 
