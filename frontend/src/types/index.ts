@@ -142,6 +142,44 @@ export interface ContradictionItem {
   created_at: string
 }
 
+export interface EvidenceReferenceItem {
+  claim_id?: string
+  claim_text?: string
+  exact_quote: string
+  source_id: string
+  source_title: string
+  source_type: string
+  page_number?: number
+  paragraph_reference?: string
+  source_uri?: string
+  confidence: number
+}
+
+export interface GapFindingItem {
+  id: string
+  session_id: string
+  requirement_id: string
+  requirement_text: string
+  category: string
+  finding_type: "COVERED" | "MISSING" | "INCOMPLETE" | "POTENTIAL CONFLICT" | "POTENTIALLY OUTDATED" | "UNVERIFIED" | string
+  explanation: string
+  supporting_claim_ids: string[]
+  source_ids: string[]
+  evidence_references: EvidenceReferenceItem[]
+  confidence: number
+  priority: "critical" | "high" | "medium" | "low" | string
+  recommended_action: string
+  limitations: string
+  created_at: string
+}
+
+export interface GapAnalysisOverviewData {
+  research_id: string
+  total_findings: number
+  counts_by_type: Record<string, number>
+  findings: GapFindingItem[]
+}
+
 export interface InformationGapItem {
   requirement_id: string
   requirement_text: string

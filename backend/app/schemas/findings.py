@@ -1,6 +1,6 @@
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class ClaimSnippet(BaseModel):
@@ -26,6 +26,46 @@ class ContradictionResponse(BaseModel):
     claim_a: ClaimSnippet
     claim_b: ClaimSnippet
     created_at: datetime
+
+
+class EvidenceReference(BaseModel):
+    claim_id: Optional[str] = None
+    claim_text: Optional[str] = None
+    exact_quote: str
+    source_id: str
+    source_title: str
+    source_type: str
+    page_number: Optional[int] = None
+    paragraph_reference: Optional[str] = None
+    source_uri: Optional[str] = None
+    confidence: float = 1.0
+
+
+class GapFindingResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    session_id: str
+    requirement_id: str
+    requirement_text: str
+    category: str
+    finding_type: str  # COVERED, MISSING, INCOMPLETE, POTENTIAL CONFLICT, POTENTIALLY OUTDATED, UNVERIFIED
+    explanation: str
+    supporting_claim_ids: List[str] = Field(default_factory=list)
+    source_ids: List[str] = Field(default_factory=list)
+    evidence_references: List[EvidenceReference] = Field(default_factory=list)
+    confidence: float = 0.90
+    priority: str = "high"  # critical, high, medium, low
+    recommended_action: str
+    limitations: str
+    created_at: datetime
+
+
+class GapAnalysisOverview(BaseModel):
+    research_id: str
+    total_findings: int
+    counts_by_type: Dict[str, int]
+    findings: List[GapFindingResponse]
 
 
 class InformationGapResponse(BaseModel):

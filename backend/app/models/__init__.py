@@ -6,6 +6,7 @@ from app.models.requirement import Requirement
 from app.models.claim import AtomicClaim
 from app.models.evidence import EvidenceLink
 from app.models.contradiction import Contradiction
+from app.models.gap_finding import GapFinding
 from app.models.blindspot import BlindSpot
 from app.models.verification_task import VerificationTask
 from app.models.report import ReportDossier
@@ -21,6 +22,7 @@ __all__ = [
     "AtomicClaim",
     "EvidenceLink",
     "Contradiction",
+    "GapFinding",
     "BlindSpot",
     "VerificationTask",
     "ReportDossier",

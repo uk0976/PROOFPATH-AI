@@ -19,6 +19,7 @@ logger = logging.getLogger("proofpath")
 
 def ensure_database_schema(eng):
     try:
+        Base.metadata.create_all(bind=eng)
         with eng.connect() as conn:
             cursor = conn.connection.cursor()
             cursor.execute("PRAGMA table_info(requirements)")

@@ -160,7 +160,14 @@ def test_evidence_and_graph_endpoints():
 
 def test_blindspots_endpoints():
     res = client.get("/api/v1/research")
-    session = next((s for s in res.json() if s.get("blindspot_count", 0) > 0 or s.get("conflict_count", 0) > 0), res.json()[-1])
+    sessions = res.json()
+    session = next((s for s in sessions if s.get("blindspot_count", 0) > 0), None)
+    if not session:
+        db = SessionLocal()
+        seed_demo_investigation(db)
+        db.close()
+        res = client.get("/api/v1/research")
+        session = next((s for s in res.json() if s.get("blindspot_count", 0) > 0), res.json()[0])
     session_id = session["id"]
 
     blindspots_res = client.get(f"/api/v1/research/{session_id}/blindspots")

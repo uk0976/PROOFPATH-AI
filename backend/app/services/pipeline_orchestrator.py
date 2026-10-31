@@ -655,7 +655,11 @@ class PipelineOrchestrator:
         reqs: List[Requirement],
         evidence_counts: Dict[str, int]
     ) -> List[Dict[str, Any]]:
-        """Stage 9: Detects information gaps, silences, and sparse coverage."""
+        """Stage 9: Detects information gaps, silences, and evaluates the 6-finding classification."""
+        from app.intelligence.gap_detection_engine import GapDetectionEngine
+        # Run and persist complete 6-category gap evaluation
+        findings = GapDetectionEngine.evaluate_session(self.db, self.session_id, persist=True)
+
         gap_agent = GapDetectorAgent()
         req_dicts = [{"id": r.id, "requirement_text": r.requirement_text, "category": r.category} for r in reqs]
         return await gap_agent.detect_gaps(req_dicts, evidence_counts)

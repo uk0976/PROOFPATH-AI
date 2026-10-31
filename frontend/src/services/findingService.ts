@@ -7,6 +7,8 @@ import {
   AtomicClaimItem,
   EvidenceGraphData,
   MatrixViewData,
+  GapFindingItem,
+  GapAnalysisOverviewData,
 } from "@/types"
 
 export interface FindingsOverview {
@@ -37,6 +39,18 @@ export const findingService = {
 
   async getGaps(sessionId: string): Promise<InformationGapItem[]> {
     const res = await apiClient.get<InformationGapItem[]>(`/findings/${sessionId}/gaps`)
+    return res.data
+  },
+
+  async getGapFindings(sessionId: string, findingType?: string): Promise<GapFindingItem[]> {
+    const res = await apiClient.get<GapFindingItem[]>(`/findings/${sessionId}/gaps`, {
+      params: findingType && findingType !== "ALL" ? { finding_type: findingType } : undefined,
+    })
+    return res.data
+  },
+
+  async evaluateGaps(sessionId: string): Promise<GapAnalysisOverviewData> {
+    const res = await apiClient.post<GapAnalysisOverviewData>(`/research/${sessionId}/evaluate-gaps`)
     return res.data
   },
 
