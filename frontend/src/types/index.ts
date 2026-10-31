@@ -256,15 +256,45 @@ export interface TemporalAuditOverviewData {
   audits: TemporalAuditItem[]
 }
 
+export interface BlindSpotSourceReference {
+  source_id: string
+  source_title: string
+  claim_id?: string
+  claim_text?: string
+  exact_quote?: string
+  page_number?: number
+}
+
 export interface BlindSpotItem {
   id: string
   session_id: string
   question: string
   rationale: string
-  risk_level: "high" | "medium" | "low"
+  explanation?: string
+  relevance: string
+  risk_level: "high" | "medium" | "low" | string
+  priority: "P1" | "P2" | "P3" | string
   category: string
+  related_requirement_id?: string
+  related_requirement_text?: string
+  evidence_coverage: "uncovered" | "partially_answered" | "answered_in_sources" | string
+  source_references: BlindSpotSourceReference[]
+  recommended_action?: string
   is_resolved: boolean
+  is_starred: boolean
+  is_dismissed: boolean
+  is_added_to_plan: boolean
+  added_requirement_id?: string
   created_at: string
+}
+
+export interface BlindSpotActionPayload {
+  id: string
+  action: string
+  status: boolean
+  message: string
+  requirement_id?: string
+  blindspot?: BlindSpotItem
 }
 
 export interface FlowNodeData {

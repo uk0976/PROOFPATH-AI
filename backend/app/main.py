@@ -89,6 +89,27 @@ def ensure_database_schema(eng):
                 if col_name not in contradiction_cols:
                     cursor.execute(f"ALTER TABLE contradictions ADD COLUMN {col_name} {col_type}")
 
+            # Check and update blindspots table
+            cursor.execute("PRAGMA table_info(blindspots)")
+            blindspot_cols = {row[1] for row in cursor.fetchall()}
+            blindspot_new_cols = [
+                ("explanation", "TEXT"),
+                ("relevance", "VARCHAR(100) DEFAULT 'high'"),
+                ("priority", "VARCHAR(50) DEFAULT 'P1'"),
+                ("related_requirement_id", "VARCHAR(36)"),
+                ("related_requirement_text", "TEXT"),
+                ("evidence_coverage", "VARCHAR(50) DEFAULT 'uncovered'"),
+                ("source_references_json", "TEXT"),
+                ("recommended_action", "TEXT"),
+                ("is_starred", "BOOLEAN DEFAULT 0"),
+                ("is_dismissed", "BOOLEAN DEFAULT 0"),
+                ("is_added_to_plan", "BOOLEAN DEFAULT 0"),
+                ("added_requirement_id", "VARCHAR(36)"),
+            ]
+            for col_name, col_type in blindspot_new_cols:
+                if col_name not in blindspot_cols:
+                    cursor.execute(f"ALTER TABLE blindspots ADD COLUMN {col_name} {col_type}")
+
             conn.connection.commit()
     except Exception as e:
         logger.warning(f"Schema migration check: {e}")

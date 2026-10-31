@@ -1,5 +1,5 @@
 import { apiClient } from "./api"
-import { BlindSpotItem } from "@/types"
+import { BlindSpotItem, BlindSpotActionPayload } from "@/types"
 
 export interface VerificationTaskItem {
   id: string
@@ -23,8 +23,31 @@ export interface ReportGenerated {
 }
 
 export const reportService = {
-  async getBlindspots(sessionId: string): Promise<BlindSpotItem[]> {
-    const res = await apiClient.get<BlindSpotItem[]>(`/research/${sessionId}/blindspots`)
+  async getBlindspots(
+    sessionId: string,
+    params?: { include_dismissed?: boolean; risk_level?: string }
+  ): Promise<BlindSpotItem[]> {
+    const res = await apiClient.get<BlindSpotItem[]>(`/research/${sessionId}/blindspots`, { params })
+    return res.data
+  },
+
+  async discoverBlindspots(sessionId: string): Promise<BlindSpotItem[]> {
+    const res = await apiClient.post<BlindSpotItem[]>(`/research/${sessionId}/discover-blindspots`)
+    return res.data
+  },
+
+  async addToPlan(blindspotId: string): Promise<BlindSpotActionPayload> {
+    const res = await apiClient.post<BlindSpotActionPayload>(`/blindspots/${blindspotId}/add-to-plan`)
+    return res.data
+  },
+
+  async toggleStar(blindspotId: string): Promise<BlindSpotActionPayload> {
+    const res = await apiClient.post<BlindSpotActionPayload>(`/blindspots/${blindspotId}/toggle-star`)
+    return res.data
+  },
+
+  async dismissBlindspot(blindspotId: string): Promise<BlindSpotActionPayload> {
+    const res = await apiClient.post<BlindSpotActionPayload>(`/blindspots/${blindspotId}/dismiss`)
     return res.data
   },
 

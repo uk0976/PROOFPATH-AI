@@ -697,32 +697,13 @@ class PipelineOrchestrator:
         session: ResearchSession,
         reqs: List[Requirement]
     ) -> List[BlindSpot]:
-        """Stage 12: Discovers counter-factual questions and blind spots."""
-        blindspot_agent = BlindSpotDiscoveryAgent()
-        discovered = await blindspot_agent.discover_blindspots(
-            goal=session.research_goal,
-            target_decision=session.target_decision or "",
-            covered_requirements=[r.requirement_text for r in reqs]
+        """Stage 12: Discovers counter-factual questions and blind spots with 10-step engine."""
+        from app.intelligence.blindspot_engine import BlindSpotDiscoveryEngine
+        return await BlindSpotDiscoveryEngine.discover_for_session(
+            db=self.db,
+            session_id=self.session_id,
+            persist=True
         )
-
-        # Clear existing blindspots for idempotency
-        self.db.query(BlindSpot).filter(BlindSpot.session_id == self.session_id).delete()
-        created_blindspots = []
-
-        for b in discovered:
-            spot = BlindSpot(
-                session_id=self.session_id,
-                question=b["question"],
-                rationale=b["rationale"],
-                risk_level=b.get("risk_level", "medium"),
-                category=b.get("category", "unaddressed_risk"),
-                is_resolved=False
-            )
-            self.db.add(spot)
-            created_blindspots.append(spot)
-
-        self.db.commit()
-        return created_blindspots
 
     async def _stage_13_evidence_graph_construction(
         self,
