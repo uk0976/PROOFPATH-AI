@@ -1,0 +1,155 @@
+import React, { useState } from "react"
+import { Link } from "react-router-dom"
+import { useQuery } from "@tanstack/react-query"
+import {
+  Plus,
+  Search,
+  ArrowRight,
+  ShieldAlert,
+  FileText,
+  AlertTriangle,
+  HelpCircle,
+  Clock,
+  Sparkles,
+} from "lucide-react"
+import { researchService } from "@/services/researchService"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { formatDate, getReadinessTier } from "@/utils/formatters"
+
+export const DashboardPage: React.FC = () => {
+  const [searchTerm, setSearchTerm] = useState("")
+
+  const { data: sessions, isLoading, error } = useQuery({
+    queryKey: ["sessions"],
+    queryFn: researchService.listSessions,
+  })
+
+  const filteredSessions = sessions?.filter((s) =>
+    s.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    s.research_goal.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200/80 pb-5">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+            Research Investigations
+          </h1>
+          <p className="text-xs text-slate-500 mt-1">
+            Forensic dossiers, cross-source conflict audits, and decision-readiness indices.
+          </p>
+        </div>
+        <Link to="/research">
+          <Button variant="primary" size="md">
+            <Plus className="w-4 h-4" />
+            <span>New Investigation</span>
+          </Button>
+        </Link>
+      </div>
+
+      {/* Search Bar */}
+      <div className="flex items-center space-x-3 max-w-md bg-white border border-slate-200 rounded-lg px-3 py-1.5 shadow-xs focus-within:ring-2 focus-within:ring-brand focus-within:border-transparent">
+        <Search className="w-4 h-4 text-slate-400" />
+        <input
+          type="text"
+          placeholder="Filter by title or research goal..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full text-xs text-slate-900 placeholder:text-slate-400 bg-transparent focus:outline-none"
+        />
+      </div>
+
+      {/* Session Cards */}
+      {isLoading ? (
+        <div className="p-12 text-center text-xs text-slate-500">
+          Loading investigation dossiers...
+        </div>
+      ) : error ? (
+        <div className="p-6 rounded-lg bg-rose-50 border border-rose-200 text-xs text-rose-700">
+          Failed to load investigations. Ensure the FastAPI backend is running on port 8000.
+        </div>
+      ) : filteredSessions?.length === 0 ? (
+        <div className="border border-dashed border-slate-300 rounded-xl p-12 text-center space-y-3 bg-white">
+          <ShieldAlert className="w-8 h-8 text-slate-400 mx-auto" />
+          <h3 className="text-sm font-semibold text-slate-900">No investigations found</h3>
+          <p className="text-xs text-slate-500 max-w-sm mx-auto">
+            Create your first forensic research dossier to cross-examine claims across multiple sources.
+          </p>
+          <Link to="/research">
+            <Button size="sm" variant="primary">
+              <Plus className="w-3.5 h-3.5" />
+              <span>Create Investigation</span>
+            </Button>
+          </Link>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-4">
+          {filteredSessions?.map((session) => {
+            const tier = getReadinessTier(session.readiness_score)
+
+            return (
+              <div
+                key={session.id}
+                className="bg-white border border-slate-200 rounded-xl p-5 shadow-card hover:border-slate-300 transition-all flex flex-col md:flex-row md:items-center justify-between gap-5"
+              >
+                <div className="space-y-2 max-w-2xl">
+                  <div className="flex items-center gap-2.5">
+                    <span className="font-semibold text-slate-900 text-base leading-snug">
+                      {session.title}
+                    </span>
+                    <Badge variant={session.status === "completed" ? "success" : "secondary"}>
+                      {session.status.toUpperCase()}
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-slate-600 line-clamp-2">
+                    {session.research_goal}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500 pt-1">
+                    <span className="flex items-center gap-1">
+                      <FileText className="w-3.5 h-3.5 text-slate-400" />
+                      {session.source_count} Sources
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <AlertTriangle className="w-3.5 h-3.5 text-rose-500" />
+                      {session.conflict_count} Conflicts
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <HelpCircle className="w-3.5 h-3.5 text-brand" />
+                      {session.blindspot_count} BlindSpots
+                    </span>
+                    <span className="flex items-center gap-1 text-[11px] text-slate-400">
+                      <Clock className="w-3 h-3" />
+                      {formatDate(session.created_at)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Score & Action Button */}
+                <div className="flex items-center gap-5 shrink-0 self-end md:self-center">
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-slate-900">
+                      {session.readiness_score.toFixed(1)}%
+                    </div>
+                    <span className={`text-[11px] font-semibold px-2 py-0.5 rounded border ${tier.bgColor} ${tier.color} ${tier.borderColor}`}>
+                      {tier.tier}
+                    </span>
+                  </div>
+
+                  <Link to={`/investigation/${session.id}`}>
+                    <Button variant="secondary" size="sm" className="gap-1.5">
+                      <span>View Audit</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
