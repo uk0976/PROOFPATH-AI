@@ -297,7 +297,7 @@ export const SourcesPage: React.FC = () => {
               {sources?.length || 0} Sources
             </Badge>
           </div>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-ink-secondary mt-1">
             Official PDFs, online URLs, and policy memorandums verified with anti-SSRF and Tesseract OCR.
           </p>
         </div>
@@ -305,8 +305,8 @@ export const SourcesPage: React.FC = () => {
         <div className="flex items-center gap-2">
           {id && (
             <Link to={`/research/${id}/plan`}>
-              <Button variant="outline" size="sm" className="text-xs gap-1.5 border-slate-200">
-                <Sparkles className="w-3.5 h-3.5 text-navy-700" />
+              <Button variant="outline" size="sm" className="text-xs gap-1.5 border-border bg-surface">
+                <Sparkles className="w-3.5 h-3.5 text-secondary" />
                 <span>Research Plan</span>
               </Button>
             </Link>
@@ -344,24 +344,24 @@ export const SourcesPage: React.FC = () => {
       )}
 
       {/* Ingestion Hub Card */}
-      <div className="bg-white border border-slate-200/90 rounded-xl p-6 shadow-card space-y-5">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-          <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
-            <Plus className="w-4 h-4 text-navy-800" />
+      <div className="bg-surface border border-border rounded-xl p-6 shadow-card space-y-5">
+        <div className="flex items-center justify-between border-b border-border pb-3">
+          <h2 className="text-sm font-semibold text-ink flex items-center gap-2">
+            <Plus className="w-4 h-4 text-primary" />
             Add Investigation Sources
           </h2>
-          <span className="text-[11px] text-slate-400">Strictly anti-hallucination grounded</span>
+          <span className="text-[11px] text-ink-muted">Strictly anti-hallucination grounded</span>
         </div>
 
         {/* Tab Selection */}
-        <div className="flex items-center space-x-1 border-b border-slate-200 pb-2">
+        <div className="flex items-center space-x-1 border-b border-border pb-2">
           <button
             type="button"
             onClick={() => setActiveTab("pdf")}
             className={`px-3.5 py-1.5 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 ${
               activeTab === "pdf"
-                ? "bg-navy-900 text-white shadow-sm"
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                ? "bg-primary text-white shadow-subtle"
+                : "text-ink-secondary hover:text-ink hover:bg-background"
             }`}
           >
             <FileText className="w-3.5 h-3.5" />
@@ -373,8 +373,8 @@ export const SourcesPage: React.FC = () => {
             onClick={() => setActiveTab("url")}
             className={`px-3.5 py-1.5 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 ${
               activeTab === "url"
-                ? "bg-navy-900 text-white shadow-sm"
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                ? "bg-primary text-white shadow-subtle"
+                : "text-ink-secondary hover:text-ink hover:bg-background"
             }`}
           >
             <Globe className="w-3.5 h-3.5" />
@@ -386,8 +386,8 @@ export const SourcesPage: React.FC = () => {
             onClick={() => setActiveTab("text")}
             className={`px-3.5 py-1.5 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 ${
               activeTab === "text"
-                ? "bg-navy-900 text-white shadow-sm"
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                ? "bg-primary text-white shadow-subtle"
+                : "text-ink-secondary hover:text-ink hover:bg-background"
             }`}
           >
             <FileCheck className="w-3.5 h-3.5" />
@@ -404,19 +404,19 @@ export const SourcesPage: React.FC = () => {
               onDrop={handleDrop}
               className={`border-2 border-dashed rounded-xl p-8 text-center transition-all flex flex-col items-center justify-center space-y-3 cursor-pointer ${
                 isDragging
-                  ? "border-navy-700 bg-navy-50/50 scale-[1.01]"
-                  : "border-slate-300 hover:border-slate-400 bg-slate-50/60 hover:bg-slate-50"
+                  ? "border-secondary bg-secondary-light/40 scale-[1.01]"
+                  : "border-border-strong hover:border-secondary bg-background/50 hover:bg-surface"
               }`}
               onClick={() => fileInputRef.current?.click()}
             >
-              <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
-                <Upload className="w-6 h-6 text-navy-800" />
+              <div className="w-12 h-12 rounded-full bg-secondary-light text-secondary flex items-center justify-center">
+                <Upload className="w-6 h-6 text-secondary" />
               </div>
               <div>
-                <p className="text-xs font-semibold text-slate-800">
+                <p className="text-xs font-semibold text-ink">
                   Click to select or drag & drop PDF files here
                 </p>
-                <p className="text-[11px] text-slate-400 mt-0.5">
+                <p className="text-[11px] text-ink-muted mt-0.5">
                   Supports multiple PDF uploads (up to 50MB each). Scanned pages automatically use Tesseract OCR.
                 </p>
               </div>
@@ -448,19 +448,19 @@ export const SourcesPage: React.FC = () => {
                   {selectedFiles.map((file, idx) => (
                     <div
                       key={idx}
-                      className="flex items-center justify-between bg-white px-3 py-1.5 rounded border border-slate-200 text-xs"
+                      className="flex items-center justify-between bg-surface px-3 py-1.5 rounded border border-border text-xs"
                     >
                       <div className="flex items-center gap-2 truncate">
-                        <FileText className="w-3.5 h-3.5 text-navy-800 shrink-0" />
-                        <span className="truncate font-medium text-slate-800">{file.name}</span>
-                        <span className="text-[10px] text-slate-400 shrink-0">
+                        <FileText className="w-3.5 h-3.5 text-secondary shrink-0" />
+                        <span className="truncate font-medium text-ink">{file.name}</span>
+                        <span className="text-[10px] text-ink-muted shrink-0">
                           ({(file.size / (1024 * 1024)).toFixed(2)} MB)
                         </span>
                       </div>
                       <button
                         type="button"
                         onClick={() => handleRemoveSelectedFile(idx)}
-                        className="text-slate-400 hover:text-red-600 p-0.5"
+                        className="text-ink-muted hover:text-status-danger p-0.5"
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>
@@ -473,7 +473,7 @@ export const SourcesPage: React.FC = () => {
                     variant="primary"
                     onClick={handleUploadFiles}
                     disabled={isSubmitting}
-                    className="gap-1.5 text-xs"
+                    className="gap-1.5 text-xs shadow-subtle"
                   >
                     <Upload className="w-3.5 h-3.5" />
                     <span>Upload & Process {selectedFiles.length} Document(s)</span>
@@ -488,14 +488,14 @@ export const SourcesPage: React.FC = () => {
         {activeTab === "url" && (
           <div className="space-y-4">
             <div className="flex items-center gap-3 text-xs">
-              <span className="text-slate-500 font-medium">Mode:</span>
+              <span className="text-ink-secondary font-medium">Mode:</span>
               <button
                 type="button"
                 onClick={() => setUrlMode("single")}
                 className={`px-2.5 py-1 rounded text-xs transition-colors ${
                   urlMode === "single"
-                    ? "bg-slate-200 text-slate-900 font-semibold"
-                    : "text-slate-500 hover:text-slate-800"
+                    ? "bg-secondary-light text-secondary font-semibold"
+                    : "text-ink-secondary hover:text-ink"
                 }`}
               >
                 Single Webpage
@@ -505,8 +505,8 @@ export const SourcesPage: React.FC = () => {
                 onClick={() => setUrlMode("batch")}
                 className={`px-2.5 py-1 rounded text-xs transition-colors ${
                   urlMode === "batch"
-                    ? "bg-slate-200 text-slate-900 font-semibold"
-                    : "text-slate-500 hover:text-slate-800"
+                    ? "bg-secondary-light text-secondary font-semibold"
+                    : "text-ink-secondary hover:text-ink"
                 }`}
               >
                 Batch Multiple URLs
@@ -517,7 +517,7 @@ export const SourcesPage: React.FC = () => {
               <div className="space-y-3">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   <div className="md:col-span-2">
-                    <label className="block text-[11px] font-medium text-slate-600 mb-1">
+                    <label className="block text-[11px] font-medium text-ink-secondary mb-1">
                       Web URL (Strict anti-SSRF inspection applied)
                     </label>
                     <input
@@ -525,11 +525,11 @@ export const SourcesPage: React.FC = () => {
                       placeholder="https://grants.gov/opportunity/eligibility-criteria"
                       value={singleUrl}
                       onChange={(e) => setSingleUrl(e.target.value)}
-                      className="w-full text-xs border border-slate-200 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-navy-800"
+                      className="w-full text-xs border border-border rounded-lg px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-secondary bg-background/50 focus:bg-surface text-ink"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-medium text-slate-600 mb-1">
+                    <label className="block text-[11px] font-medium text-ink-secondary mb-1">
                       Custom Title (Optional)
                     </label>
                     <input
@@ -537,13 +537,13 @@ export const SourcesPage: React.FC = () => {
                       placeholder="e.g. Official Grants Portal"
                       value={singleUrlTitle}
                       onChange={(e) => setSingleUrlTitle(e.target.value)}
-                      className="w-full text-xs border border-slate-200 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-navy-800"
+                      className="w-full text-xs border border-border rounded-lg px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-secondary bg-background/50 focus:bg-surface text-ink"
                     />
                   </div>
                 </div>
                 <div className="flex items-center justify-between pt-1">
-                  <span className="text-[11px] text-slate-400 flex items-center gap-1">
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                  <span className="text-[11px] text-ink-muted flex items-center gap-1">
+                    <ShieldCheck className="w-3.5 h-3.5 text-status-success" />
                     Private RFC 1918 IPs and localhost addresses are rejected.
                   </span>
                   <Button
@@ -551,7 +551,7 @@ export const SourcesPage: React.FC = () => {
                     variant="primary"
                     onClick={handleAddSingleUrl}
                     disabled={isSubmitting || !singleUrl.trim()}
-                    className="text-xs"
+                    className="text-xs shadow-subtle"
                   >
                     Scrape & Ingest URL
                   </Button>
@@ -560,7 +560,7 @@ export const SourcesPage: React.FC = () => {
             ) : (
               <div className="space-y-3">
                 <div>
-                  <label className="block text-[11px] font-medium text-slate-600 mb-1">
+                  <label className="block text-[11px] font-medium text-ink-secondary mb-1">
                     Enter one URL per line:
                   </label>
                   <textarea
@@ -568,11 +568,11 @@ export const SourcesPage: React.FC = () => {
                     placeholder="https://scholarships.gov/faqs&#10;https://university.edu/admissions/financial-aid&#10;https://education.gov/grants/income-limits"
                     value={batchUrlsText}
                     onChange={(e) => setBatchUrlsText(e.target.value)}
-                    className="w-full text-xs font-mono border border-slate-200 rounded-lg p-3 focus:outline-none focus:ring-1 focus:ring-navy-800"
+                    className="w-full text-xs font-mono border border-border rounded-lg p-3 focus:outline-none focus:ring-1 focus:ring-secondary bg-background/50 focus:bg-surface text-ink"
                   />
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] text-slate-400">
+                  <span className="text-[11px] text-ink-muted">
                     Each URL is independently scraped with Trafilatura and BeautifulSoup.
                   </span>
                   <Button
@@ -580,7 +580,7 @@ export const SourcesPage: React.FC = () => {
                     variant="primary"
                     onClick={handleAddBatchUrls}
                     disabled={isSubmitting || !batchUrlsText.trim()}
-                    className="text-xs"
+                    className="text-xs shadow-subtle"
                   >
                     Ingest URL Batch
                   </Button>
@@ -594,7 +594,7 @@ export const SourcesPage: React.FC = () => {
         {activeTab === "text" && (
           <div className="space-y-3">
             <div>
-              <label className="block text-[11px] font-medium text-slate-600 mb-1">
+              <label className="block text-[11px] font-medium text-ink-secondary mb-1">
                 Document / Memorandum Title
               </label>
               <input
@@ -602,11 +602,11 @@ export const SourcesPage: React.FC = () => {
                 placeholder="e.g. Internal Financial Verification Meeting Minutes (May 2024)"
                 value={textTitle}
                 onChange={(e) => setTextTitle(e.target.value)}
-                className="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-navy-800"
+                className="w-full text-xs border border-border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-secondary bg-background/50 focus:bg-surface text-ink"
               />
             </div>
             <div>
-              <label className="block text-[11px] font-medium text-slate-600 mb-1">
+              <label className="block text-[11px] font-medium text-ink-secondary mb-1">
                 Raw Content or Text Excerpt
               </label>
               <textarea
@@ -614,11 +614,11 @@ export const SourcesPage: React.FC = () => {
                 placeholder="Paste verbatim memorandum, policy text, email confirmation, or transcript..."
                 value={textContent}
                 onChange={(e) => setTextContent(e.target.value)}
-                className="w-full text-xs border border-slate-200 rounded-lg p-3 focus:outline-none focus:ring-1 focus:ring-navy-800 font-sans leading-relaxed"
+                className="w-full text-xs border border-border rounded-lg p-3 focus:outline-none focus:ring-1 focus:ring-secondary font-sans leading-relaxed bg-background/50 focus:bg-surface text-ink"
               />
             </div>
             <div className="flex items-center justify-between pt-1">
-              <span className="text-[11px] text-slate-400">
+              <span className="text-[11px] text-ink-muted">
                 {textContent.length} characters • {textContent.trim().split(/\s+/).filter(Boolean).length} words
               </span>
               <Button
@@ -626,7 +626,7 @@ export const SourcesPage: React.FC = () => {
                 variant="primary"
                 onClick={handleAddText}
                 disabled={isSubmitting || !textContent.trim()}
-                className="text-xs"
+                className="text-xs shadow-subtle"
               >
                 Ingest Memorandum
               </Button>
@@ -867,8 +867,8 @@ export const SourcesPage: React.FC = () => {
                 onClick={() => setPreviewTab("content")}
                 className={`py-3 px-3 font-medium border-b-2 transition-colors ${
                   previewTab === "content"
-                    ? "border-navy-900 text-navy-900"
-                    : "border-transparent text-slate-500 hover:text-slate-800"
+                    ? "border-primary text-primary"
+                    : "border-transparent text-ink-secondary hover:text-ink"
                 }`}
               >
                 Cleaned Full Text
@@ -878,8 +878,8 @@ export const SourcesPage: React.FC = () => {
                 onClick={() => setPreviewTab("chunks")}
                 className={`py-3 px-3 font-medium border-b-2 transition-colors ${
                   previewTab === "chunks"
-                    ? "border-navy-900 text-navy-900"
-                    : "border-transparent text-slate-500 hover:text-slate-800"
+                    ? "border-primary text-primary"
+                    : "border-transparent text-ink-secondary hover:text-ink"
                 }`}
               >
                 Chunks & Provenance ({previewSource.chunks?.length || previewSource.chunk_count || 0})
@@ -889,8 +889,8 @@ export const SourcesPage: React.FC = () => {
                 onClick={() => setPreviewTab("metadata")}
                 className={`py-3 px-3 font-medium border-b-2 transition-colors ${
                   previewTab === "metadata"
-                    ? "border-navy-900 text-navy-900"
-                    : "border-transparent text-slate-500 hover:text-slate-800"
+                    ? "border-primary text-primary"
+                    : "border-transparent text-ink-secondary hover:text-ink"
                 }`}
               >
                 Forensic Metadata & Hash

@@ -97,28 +97,28 @@ export const ReportPage: React.FC = () => {
   const tier = getReadinessTier(session.readiness_score)
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10 space-y-8 print:p-0">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-7 print:p-0">
       {/* Action Header (Hidden in Print) */}
-      <div className="flex items-center justify-between border-b border-slate-200/80 pb-5 print:hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-5 print:hidden">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-2xl font-bold tracking-tight text-ink">
             Executive Briefing Dossier
           </h1>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-ink-secondary mt-1">
             Printable, audit-grade verification report for stakeholders.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => window.print()} className="gap-1.5">
+          <Button variant="outline" size="sm" onClick={() => window.print()} className="gap-1.5 bg-surface">
             <Printer className="w-3.5 h-3.5" />
             <span>Print</span>
           </Button>
-          <Button variant="outline" size="sm" onClick={handleDownloadMarkdown} className="gap-1.5">
+          <Button variant="outline" size="sm" onClick={handleDownloadMarkdown} className="gap-1.5 bg-surface">
             <Download className="w-3.5 h-3.5" />
             <span>Markdown</span>
           </Button>
-          <Button variant="primary" size="sm" onClick={handleDownloadPdf} disabled={isDownloadingPdf} className="gap-1.5">
+          <Button variant="primary" size="sm" onClick={handleDownloadPdf} disabled={isDownloadingPdf} className="gap-1.5 shadow-subtle">
             <Download className="w-3.5 h-3.5" />
             <span>{isDownloadingPdf ? "Generating PDF..." : "Download PDF"}</span>
           </Button>
@@ -126,23 +126,23 @@ export const ReportPage: React.FC = () => {
       </div>
 
       {/* Printable Report Canvas */}
-      <div className="bg-white border border-slate-200 rounded-xl p-8 shadow-card space-y-8 print:border-none print:shadow-none print:p-0">
+      <div className="bg-surface border border-border rounded-xl p-8 shadow-card space-y-8 print:border-none print:shadow-none print:p-0">
         {/* Dossier Header */}
-        <div className="border-b border-slate-200 pb-6 space-y-2">
-          <div className="flex items-center justify-between text-xs text-slate-400 font-mono">
+        <div className="border-b border-border pb-6 space-y-2">
+          <div className="flex items-center justify-between text-xs text-ink-muted font-mono">
             <span>PROOFPATH AI — FORENSIC INFORMATION AUDIT</span>
             <span>GENERATED: {formatDate(new Date().toISOString())}</span>
           </div>
-          <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+          <h2 className="text-3xl font-extrabold text-ink tracking-tight">
             {session.title}
           </h2>
-          <p className="text-xs text-slate-600 max-w-3xl">
-            <span className="font-semibold text-slate-900">Research Goal: </span>
+          <p className="text-xs text-ink-secondary max-w-3xl">
+            <span className="font-semibold text-ink">Research Goal: </span>
             {session.research_goal}
           </p>
           {session.target_decision && (
-            <p className="text-xs text-slate-600">
-              <span className="font-semibold text-slate-900">Target Decision: </span>
+            <p className="text-xs text-ink-secondary">
+              <span className="font-semibold text-ink">Target Decision: </span>
               {session.target_decision}
             </p>
           )}
@@ -150,41 +150,41 @@ export const ReportPage: React.FC = () => {
 
         {/* Section 1: Executive Verdict & DRI */}
         <div className="space-y-4">
-          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+          <h3 className="text-xs font-bold text-ink-muted uppercase tracking-wider">
             1. Executive Verdict & Decision Readiness Index (DRI)
           </h3>
 
-          <div className="p-6 rounded-xl border border-slate-200 bg-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="p-6 rounded-xl border border-border bg-background/50 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-2">
               <div className="flex items-baseline gap-3">
-                <span className="text-4xl font-extrabold text-slate-900">
+                <span className="text-4xl font-extrabold text-ink">
                   {session.readiness_score.toFixed(1)}%
                 </span>
                 <span className={`px-2.5 py-0.5 rounded text-xs font-bold border ${tier.bgColor} ${tier.color} ${tier.borderColor}`}>
                   {tier.tier}
                 </span>
               </div>
-              <p className="text-xs text-slate-700 max-w-xl">
+              <p className="text-xs text-ink-secondary max-w-xl">
                 {session.executive_verdict}
               </p>
             </div>
 
             <div className="grid grid-cols-2 gap-4 text-xs">
               <div>
-                <span className="text-slate-400 block text-[10px] uppercase">Coverage</span>
-                <span className="font-bold text-slate-900">{session.coverage_score.toFixed(1)}%</span>
+                <span className="text-ink-muted block text-[10px] uppercase font-semibold">Coverage</span>
+                <span className="font-bold text-ink">{session.coverage_score.toFixed(1)}%</span>
               </div>
               <div>
-                <span className="text-slate-400 block text-[10px] uppercase">Consistency</span>
-                <span className="font-bold text-slate-900">{session.consistency_score.toFixed(1)}%</span>
+                <span className="text-ink-muted block text-[10px] uppercase font-semibold">Consistency</span>
+                <span className="font-bold text-ink">{session.consistency_score.toFixed(1)}%</span>
               </div>
               <div>
-                <span className="text-slate-400 block text-[10px] uppercase">Freshness</span>
-                <span className="font-bold text-slate-900">{session.freshness_score.toFixed(1)}%</span>
+                <span className="text-ink-muted block text-[10px] uppercase font-semibold">Freshness</span>
+                <span className="font-bold text-ink">{session.freshness_score.toFixed(1)}%</span>
               </div>
               <div>
-                <span className="text-slate-400 block text-[10px] uppercase">Verification</span>
-                <span className="font-bold text-slate-900">{session.verification_score.toFixed(1)}%</span>
+                <span className="text-ink-muted block text-[10px] uppercase font-semibold">Verification</span>
+                <span className="font-bold text-ink">{session.verification_score.toFixed(1)}%</span>
               </div>
             </div>
           </div>
@@ -192,12 +192,12 @@ export const ReportPage: React.FC = () => {
 
         {/* Section 2: Ingested Sources */}
         <div className="space-y-3">
-          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+          <h3 className="text-xs font-bold text-ink-muted uppercase tracking-wider">
             2. Evidentiary Sources ({sources?.length || 0})
           </h3>
-          <div className="border border-slate-200 rounded-lg overflow-hidden text-xs">
+          <div className="border border-border rounded-lg overflow-hidden text-xs">
             <table className="w-full text-left">
-              <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold">
+              <thead className="bg-background-subtle border-b border-border text-ink-secondary font-semibold">
                 <tr>
                   <th className="p-2.5">Source Title</th>
                   <th className="p-2.5">Type</th>
@@ -205,13 +205,13 @@ export const ReportPage: React.FC = () => {
                   <th className="p-2.5">Extracted Chunks</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-border-subtle bg-surface">
                 {sources?.map((s) => (
                   <tr key={s.id}>
-                    <td className="p-2.5 font-medium text-slate-900">{s.title}</td>
-                    <td className="p-2.5 uppercase font-mono text-[10px] text-slate-500">{s.source_type}</td>
-                    <td className="p-2.5 text-slate-500">{s.publication_date ? formatDate(s.publication_date) : "Undated"}</td>
-                    <td className="p-2.5 text-slate-500">{s.chunk_count}</td>
+                    <td className="p-2.5 font-medium text-ink">{s.title}</td>
+                    <td className="p-2.5 uppercase font-mono text-[10px] text-ink-muted">{s.source_type}</td>
+                    <td className="p-2.5 text-ink-secondary">{s.publication_date ? formatDate(s.publication_date) : "Undated"}</td>
+                    <td className="p-2.5 text-ink-secondary">{s.chunk_count}</td>
                   </tr>
                 ))}
               </tbody>
@@ -221,12 +221,12 @@ export const ReportPage: React.FC = () => {
 
         {/* Section 3: Evaluation Criteria Matrix */}
         <div className="space-y-3">
-          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+          <h3 className="text-xs font-bold text-ink-muted uppercase tracking-wider">
             3. Evaluation Criteria & Coverage ({requirements?.length || 0})
           </h3>
-          <div className="border border-slate-200 rounded-lg overflow-hidden text-xs">
+          <div className="border border-border rounded-lg overflow-hidden text-xs">
             <table className="w-full text-left">
-              <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold">
+              <thead className="bg-background-subtle border-b border-border text-ink-secondary font-semibold">
                 <tr>
                   <th className="p-2.5">Criterion</th>
                   <th className="p-2.5">Category</th>
@@ -234,17 +234,17 @@ export const ReportPage: React.FC = () => {
                   <th className="p-2.5">Evidence Count</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-border-subtle bg-surface">
                 {requirements?.map((r) => (
                   <tr key={r.id}>
-                    <td className="p-2.5 font-medium text-slate-900">{r.requirement_text}</td>
-                    <td className="p-2.5 text-slate-500">{r.category}</td>
+                    <td className="p-2.5 font-medium text-ink">{r.requirement_text}</td>
+                    <td className="p-2.5 text-ink-secondary">{r.category}</td>
                     <td className="p-2.5">
                       <Badge variant={r.status === "covered" ? "success" : r.status === "conflict" ? "danger" : "warning"}>
                         {r.status.toUpperCase()}
                       </Badge>
                     </td>
-                    <td className="p-2.5 text-slate-500">{r.evidence_count}</td>
+                    <td className="p-2.5 text-ink-secondary">{r.evidence_count}</td>
                   </tr>
                 ))}
               </tbody>
@@ -254,13 +254,13 @@ export const ReportPage: React.FC = () => {
 
         {/* Section 4: Cross-Source Contradictions */}
         <div className="space-y-3">
-          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+          <h3 className="text-xs font-bold text-ink-muted uppercase tracking-wider">
             4. Cross-Source Contradictions ({conflicts?.length || 0})
           </h3>
           {conflicts?.map((c, idx) => (
-            <div key={c.id} className="p-4 rounded-lg border border-slate-200 bg-slate-50 space-y-2 text-xs">
+            <div key={c.id} className="p-4 rounded-lg border border-border bg-background/50 space-y-2 text-xs">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-slate-900">
+                <span className="font-bold text-ink">
                   Conflict #{idx + 1}: {c.conflicting_aspect}
                 </span>
                 <Badge variant={c.severity === "high" ? "danger" : "warning"}>
@@ -268,17 +268,17 @@ export const ReportPage: React.FC = () => {
                 </Badge>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
-                <div className="bg-white p-2.5 rounded border border-slate-200">
-                  <span className="text-[10px] text-slate-400 uppercase font-semibold block">{c.claim_a.source_title}:</span>
-                  <span className="text-slate-700 italic">"{c.claim_a.exact_quote}"</span>
+                <div className="bg-surface p-2.5 rounded border border-border">
+                  <span className="text-[10px] text-ink-muted uppercase font-semibold block">{c.claim_a.source_title}:</span>
+                  <span className="text-ink-secondary italic">"{c.claim_a.exact_quote}"</span>
                 </div>
-                <div className="bg-white p-2.5 rounded border border-slate-200">
-                  <span className="text-[10px] text-slate-400 uppercase font-semibold block">{c.claim_b.source_title}:</span>
-                  <span className="text-slate-700 italic">"{c.claim_b.exact_quote}"</span>
+                <div className="bg-surface p-2.5 rounded border border-border">
+                  <span className="text-[10px] text-ink-muted uppercase font-semibold block">{c.claim_b.source_title}:</span>
+                  <span className="text-ink-secondary italic">"{c.claim_b.exact_quote}"</span>
                 </div>
               </div>
-              <p className="text-slate-600 pt-1">
-                <span className="font-semibold text-slate-800">Forensic Verdict: </span>
+              <p className="text-ink-secondary pt-1">
+                <span className="font-semibold text-ink">Forensic Verdict: </span>
                 {c.synthesis_verdict}
               </p>
             </div>
@@ -287,16 +287,16 @@ export const ReportPage: React.FC = () => {
 
         {/* Section 5: BlindSpot Signoff */}
         <div className="space-y-3">
-          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+          <h3 className="text-xs font-bold text-ink-muted uppercase tracking-wider">
             5. BlindSpot Discovery Sign-Off ({blindspots?.length || 0})
           </h3>
           <div className="space-y-2 text-xs">
             {blindspots?.map((b, idx) => (
-              <div key={b.id} className="p-3 rounded-lg border border-slate-100 flex items-start gap-3">
-                <span className="font-mono text-slate-400 font-bold">{idx + 1}.</span>
+              <div key={b.id} className="p-3 rounded-lg border border-border/70 bg-surface flex items-start gap-3">
+                <span className="font-mono text-ink-muted font-bold">{idx + 1}.</span>
                 <div className="space-y-0.5">
-                  <span className="font-semibold text-slate-900">{b.question}</span>
-                  <p className="text-slate-500 text-[11px]">{b.rationale}</p>
+                  <span className="font-semibold text-ink">{b.question}</span>
+                  <p className="text-ink-secondary text-[11px]">{b.rationale}</p>
                 </div>
               </div>
             ))}
@@ -304,7 +304,7 @@ export const ReportPage: React.FC = () => {
         </div>
 
         {/* Signoff Footer */}
-        <div className="border-t border-slate-200 pt-6 flex items-center justify-between text-xs text-slate-400">
+        <div className="border-t border-border pt-6 flex items-center justify-between text-xs text-ink-muted">
           <span>ProofPath AI Automated Forensic Verification</span>
           <span>Approved By: ___________________________</span>
         </div>

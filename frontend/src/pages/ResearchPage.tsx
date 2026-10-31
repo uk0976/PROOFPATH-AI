@@ -141,22 +141,22 @@ export const ResearchPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 space-y-8">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-7">
       {/* Header */}
       <div>
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-700 uppercase tracking-wider mb-2">
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-semibold bg-secondary-light text-secondary uppercase tracking-wider mb-2">
           Step 1: Investigation Setup
         </div>
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink">
           Initiate Forensic Information Audit
         </h1>
-        <p className="text-xs sm:text-sm text-slate-500 mt-1">
+        <p className="text-xs sm:text-sm text-ink-secondary mt-1">
           Define the primary question, target decision, and upload competing evidence sources to cross-examine.
         </p>
       </div>
 
       {error && (
-        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center gap-2">
+        <div className="p-4 rounded-xl bg-status-danger-bg border border-status-danger-border text-xs text-status-danger flex items-center gap-2">
           <AlertCircle className="w-4 h-4 shrink-0" />
           <span>{error}</span>
         </div>
@@ -164,7 +164,7 @@ export const ResearchPage: React.FC = () => {
 
       {/* Preset helpers */}
       <div className="space-y-2">
-        <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
+        <label className="text-xs font-semibold text-ink-secondary uppercase tracking-wider">
           Quick Start Enterprise Scenarios:
         </label>
         <div className="flex flex-wrap gap-2">
@@ -177,9 +177,10 @@ export const ResearchPage: React.FC = () => {
                 "Determine complete qualification and prepare all required documentation prior to deadline."
               )
             }
-            className="text-xs bg-white border border-blue-200 hover:border-blue-500 hover:text-blue-700 px-3 py-1.5 rounded-lg text-slate-700 transition-all shadow-xs font-medium"
+            className="text-xs bg-surface border border-secondary/30 hover:border-secondary hover:text-secondary px-3 py-1.5 rounded-lg text-ink transition-all shadow-subtle font-medium flex items-center gap-1.5"
           >
-            🎓 Government Scholarship Inquiry
+            <span>🎓</span>
+            <span>Government Scholarship Inquiry</span>
           </button>
           <button
             type="button"
@@ -190,9 +191,10 @@ export const ResearchPage: React.FC = () => {
                 "Authorize market entry and go-to-market resource allocation."
               )
             }
-            className="text-xs bg-white border border-emerald-200 hover:border-emerald-500 hover:text-emerald-700 px-3 py-1.5 rounded-lg text-slate-700 transition-all shadow-xs font-medium"
+            className="text-xs bg-surface border border-border hover:border-secondary hover:text-secondary px-3 py-1.5 rounded-lg text-ink transition-all shadow-subtle font-medium flex items-center gap-1.5"
           >
-            💼 Business & Market Feasibility
+            <span>💼</span>
+            <span>Business & Market Feasibility</span>
           </button>
           <button
             type="button"
@@ -203,9 +205,10 @@ export const ResearchPage: React.FC = () => {
                 "File formal entitlement claim with certified evidence."
               )
             }
-            className="text-xs bg-white border border-purple-200 hover:border-purple-500 hover:text-purple-700 px-3 py-1.5 rounded-lg text-slate-700 transition-all shadow-xs font-medium"
+            className="text-xs bg-surface border border-border hover:border-secondary hover:text-secondary px-3 py-1.5 rounded-lg text-ink transition-all shadow-subtle font-medium flex items-center gap-1.5"
           >
-            🏛️ Government Services & Benefits
+            <span>🏛️</span>
+            <span>Government Services & Benefits</span>
           </button>
           <button
             type="button"
@@ -216,17 +219,18 @@ export const ResearchPage: React.FC = () => {
                 "Production architectural sign-off for Q3 migration"
               )
             }
-            className="text-xs bg-white border border-slate-200 hover:border-brand hover:text-brand px-3 py-1.5 rounded-lg text-slate-700 transition-all shadow-xs"
+            className="text-xs bg-surface border border-border hover:border-secondary hover:text-secondary px-3 py-1.5 rounded-lg text-ink transition-all shadow-subtle font-medium flex items-center gap-1.5"
           >
-            ⚙️ Serverless vs Kubernetes
+            <span>⚙️</span>
+            <span>Serverless vs Kubernetes</span>
           </button>
         </div>
       </div>
 
       {/* Form Fields */}
-      <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-card space-y-5">
+      <div className="bg-surface border border-border rounded-xl p-6 shadow-card space-y-5">
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">
+          <label className="text-xs font-semibold text-ink uppercase tracking-wider">
             Investigation Title *
           </label>
           <input
@@ -234,12 +238,12 @@ export const ResearchPage: React.FC = () => {
             placeholder="e.g. Serverless vs Kubernetes Architecture Audit"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full text-xs sm:text-sm text-slate-900 border border-slate-200 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
+            className="w-full text-xs sm:text-sm text-ink border border-border rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent bg-background/50 focus:bg-surface"
           />
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">
+          <label className="text-xs font-semibold text-ink uppercase tracking-wider">
             Primary Research Goal / Question *
           </label>
           <textarea
@@ -247,12 +251,12 @@ export const ResearchPage: React.FC = () => {
             placeholder="What exact claims, limits, or trade-offs need to be investigated and cross-examined?"
             value={goal}
             onChange={(e) => setGoal(e.target.value)}
-            className="w-full text-xs sm:text-sm text-slate-900 border border-slate-200 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
+            className="w-full text-xs sm:text-sm text-ink border border-border rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent bg-background/50 focus:bg-surface"
           />
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">
+          <label className="text-xs font-semibold text-ink uppercase tracking-wider">
             Target Decision Riding on this Audit (Optional)
           </label>
           <input
@@ -260,18 +264,18 @@ export const ResearchPage: React.FC = () => {
             placeholder="e.g. Production cloud architecture sign-off for Q3"
             value={decision}
             onChange={(e) => setDecision(e.target.value)}
-            className="w-full text-xs sm:text-sm text-slate-900 border border-slate-200 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
+            className="w-full text-xs sm:text-sm text-ink border border-border rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent bg-background/50 focus:bg-surface"
           />
         </div>
       </div>
 
       {/* Sources Ingestion Section */}
-      <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-card space-y-5">
+      <div className="bg-surface border border-border rounded-xl p-6 shadow-card space-y-5">
         <div>
-          <h3 className="text-sm font-semibold text-slate-900">
+          <h3 className="text-sm font-semibold text-ink">
             Ingest Evidence Sources
           </h3>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-ink-secondary">
             Add 2 or more competing sources to enable cross-source contradiction detection and verification.
           </p>
         </div>
@@ -279,17 +283,17 @@ export const ResearchPage: React.FC = () => {
         {/* Inputs */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {/* PDF File Upload */}
-          <label className="border border-dashed border-slate-300 hover:border-brand rounded-xl p-4 text-center cursor-pointer transition-all flex flex-col items-center justify-center space-y-1.5 bg-slate-50/50 hover:bg-slate-50">
-            <Upload className="w-5 h-5 text-slate-400" />
-            <span className="text-xs font-semibold text-slate-700">Upload PDF</span>
-            <span className="text-[10px] text-slate-400">Whitepapers, specs, slides</span>
+          <label className="border border-dashed border-border-strong hover:border-secondary rounded-xl p-4 text-center cursor-pointer transition-all flex flex-col items-center justify-center space-y-1.5 bg-background/50 hover:bg-surface shadow-subtle">
+            <Upload className="w-5 h-5 text-ink-muted" />
+            <span className="text-xs font-semibold text-ink">Upload PDF</span>
+            <span className="text-[10px] text-ink-muted">Whitepapers, specs, slides</span>
             <input type="file" accept=".pdf" onChange={handleFileUpload} className="hidden" />
           </label>
 
           {/* URL Input */}
-          <div className="border border-slate-200 rounded-xl p-3 flex flex-col justify-between space-y-2 bg-white">
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700">
-              <Globe className="w-4 h-4 text-slate-400" />
+          <div className="border border-border rounded-xl p-3 flex flex-col justify-between space-y-2 bg-surface">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-ink">
+              <Globe className="w-4 h-4 text-secondary" />
               <span>Web URL</span>
             </div>
             <input
@@ -297,7 +301,7 @@ export const ResearchPage: React.FC = () => {
               placeholder="https://..."
               value={urlInput}
               onChange={(e) => setUrlInput(e.target.value)}
-              className="text-xs border border-slate-200 rounded p-1.5 focus:outline-none focus:ring-1 focus:ring-brand"
+              className="text-xs border border-border rounded p-1.5 focus:outline-none focus:ring-1 focus:ring-secondary bg-background/40 focus:bg-surface"
             />
             <Button size="sm" variant="secondary" onClick={handleAddUrl} disabled={!urlInput.trim()}>
               Add URL
@@ -305,9 +309,9 @@ export const ResearchPage: React.FC = () => {
           </div>
 
           {/* Text Paste */}
-          <div className="border border-slate-200 rounded-xl p-3 flex flex-col justify-between space-y-2 bg-white">
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700">
-              <FileText className="w-4 h-4 text-slate-400" />
+          <div className="border border-border rounded-xl p-3 flex flex-col justify-between space-y-2 bg-surface">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-ink">
+              <FileText className="w-4 h-4 text-secondary" />
               <span>Paste Text</span>
             </div>
             <input
@@ -315,14 +319,14 @@ export const ResearchPage: React.FC = () => {
               placeholder="Title..."
               value={textTitle}
               onChange={(e) => setTextTitle(e.target.value)}
-              className="text-xs border border-slate-200 rounded p-1.5 focus:outline-none"
+              className="text-xs border border-border rounded p-1.5 focus:outline-none bg-background/40 focus:bg-surface"
             />
             <textarea
               rows={2}
               placeholder="Paste raw memorandum or notes..."
               value={textInput}
               onChange={(e) => setTextInput(e.target.value)}
-              className="text-xs border border-slate-200 rounded p-1.5 focus:outline-none resize-none"
+              className="text-xs border border-border rounded p-1.5 focus:outline-none resize-none bg-background/40 focus:bg-surface"
             />
             <Button size="sm" variant="secondary" onClick={handleAddText} disabled={!textInput.trim()}>
               Add Text
@@ -333,15 +337,15 @@ export const ResearchPage: React.FC = () => {
         {/* Queued Sources List */}
         {sourcesQueue.length > 0 && (
           <div className="pt-2 space-y-2">
-            <span className="text-xs font-semibold text-slate-700">
+            <span className="text-xs font-semibold text-ink">
               Queued Sources ({sourcesQueue.length}):
             </span>
             <div className="space-y-1.5">
               {sourcesQueue.map((s, idx) => (
-                <div key={idx} className="flex items-center justify-between p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-xs">
+                <div key={idx} className="flex items-center justify-between p-2.5 rounded-lg border border-border bg-surface text-xs shadow-subtle">
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                    <span className="font-medium text-slate-900">{s.title}</span>
+                    <CheckCircle2 className="w-4 h-4 text-status-success" />
+                    <span className="font-medium text-ink">{s.title}</span>
                     <Badge variant="outline" className="text-[10px] uppercase font-mono">
                       {s.type}
                     </Badge>
@@ -349,7 +353,7 @@ export const ResearchPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setSourcesQueue(sourcesQueue.filter((_, i) => i !== idx))}
-                    className="text-slate-400 hover:text-rose-600 text-xs font-bold px-2"
+                    className="text-ink-muted hover:text-status-danger text-xs font-bold px-2 transition-colors"
                   >
                     ✕
                   </button>
@@ -363,22 +367,22 @@ export const ResearchPage: React.FC = () => {
       {/* Action Footer */}
       <div className="flex flex-wrap items-center justify-end gap-3 pt-2">
         <Button
-          size="lg"
+          size="md"
           variant="outline"
           onClick={handleSaveAndPlan}
           disabled={isSubmitting}
-          className="px-6 font-semibold flex items-center gap-2 bg-white"
+          className="px-5 font-medium flex items-center gap-2 bg-surface"
         >
-          <Sparkles className="w-4 h-4 text-blue-600" />
+          <Sparkles className="w-4 h-4 text-secondary" />
           <span>Configure Research Plan (AI Planner)</span>
         </Button>
 
         <Button
-          size="lg"
+          size="md"
           variant="primary"
           onClick={handleSubmit}
           disabled={isSubmitting}
-          className="px-8 font-semibold flex items-center gap-2"
+          className="px-6 font-semibold flex items-center gap-2 shadow-subtle"
         >
           {isSubmitting ? (
             <span>Processing Ingestion & Pipeline...</span>

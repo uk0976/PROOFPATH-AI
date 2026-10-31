@@ -199,40 +199,41 @@ export const ResearchPlanPage: React.FC = () => {
             <Link to={`/investigation/${id}`} className="text-slate-500 hover:text-slate-800">
               Investigation
             </Link>
-            <span className="text-slate-300">/</span>
-            <span className="font-semibold text-slate-900">Intelligent Research Planner</span>
+            <span className="text-ink-muted">/</span>
+            <span className="font-semibold text-ink">Intelligent Research Planner</span>
           </div>
 
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2.5">
-            <div className="p-1.5 rounded-lg bg-[#172B45] text-white">
+          <h1 className="text-2xl font-bold tracking-tight text-ink flex items-center gap-2.5">
+            <div className="p-1.5 rounded-lg bg-primary text-white">
               <ListOrdered className="w-5 h-5" />
             </div>
             <span>Intelligent Research Planner</span>
           </h1>
 
-          <p className="text-xs text-slate-500 mt-1 max-w-2xl leading-relaxed">
+          <p className="text-xs text-ink-secondary mt-1 max-w-2xl leading-relaxed">
             Decompose broad research goals into structured, independently verifiable research
             requirements. Review, customize, and approve requirements prior to forensic analysis.
           </p>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2.5">
           <Button
             size="sm"
             variant="outline"
             onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center gap-1.5 text-xs bg-white"
+            className="flex items-center gap-1.5 text-xs bg-surface"
           >
-            <Plus className="w-3.5 h-3.5 text-slate-500" />
+            <Plus className="w-3.5 h-3.5 text-ink-muted" />
             <span>Add Custom Question</span>
           </Button>
 
           <Button
             size="sm"
+            variant="primary"
             onClick={() => generateMutation.mutate()}
             disabled={generateMutation.isPending}
-            className="flex items-center gap-1.5 text-xs bg-blue-600 hover:bg-blue-700 text-white shadow-xs"
+            className="flex items-center gap-1.5 text-xs shadow-subtle"
           >
             {generateMutation.isPending ? (
               <RefreshCw className="w-3.5 h-3.5 animate-spin" />
@@ -245,11 +246,12 @@ export const ResearchPlanPage: React.FC = () => {
           {suggestedReqs.length > 0 && (
             <Button
               size="sm"
+              variant="secondary"
               onClick={() => approveMutation.mutate()}
               disabled={approveMutation.isPending}
-              className="flex items-center gap-1.5 text-xs bg-[#23865B] hover:bg-emerald-700 text-white shadow-xs"
+              className="flex items-center gap-1.5 text-xs font-semibold text-status-success border border-status-success-border bg-status-success-bg hover:bg-emerald-100"
             >
-              <CheckCircle2 className="w-3.5 h-3.5" />
+              <CheckCircle2 className="w-3.5 h-3.5 text-status-success" />
               <span>Approve All ({plan?.ai_suggested_count || 0})</span>
             </Button>
           )}
@@ -262,21 +264,21 @@ export const ResearchPlanPage: React.FC = () => {
           className={cn(
             "p-3.5 rounded-xl border flex items-center justify-between gap-2 text-xs transition-all",
             actionMessage.type === "success"
-              ? "bg-emerald-50 border-emerald-200 text-emerald-800"
-              : "bg-rose-50 border-rose-200 text-rose-800"
+              ? "bg-status-success-bg border-status-success-border text-status-success"
+              : "bg-status-danger-bg border-status-danger-border text-status-danger"
           )}
         >
           <div className="flex items-center gap-2">
             {actionMessage.type === "success" ? (
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <CheckCircle2 className="w-4 h-4 text-status-success shrink-0" />
             ) : (
-              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+              <AlertCircle className="w-4 h-4 text-status-danger shrink-0" />
             )}
             <span className="font-medium">{actionMessage.text}</span>
           </div>
           <button
             onClick={() => setActionMessage(null)}
-            className="text-[11px] font-semibold text-slate-500 hover:text-slate-800 underline"
+            className="text-[11px] font-semibold text-ink-secondary hover:text-ink underline"
           >
             Dismiss
           </button>
@@ -284,28 +286,28 @@ export const ResearchPlanPage: React.FC = () => {
       )}
 
       {/* Scenario Presets Quick-Bar */}
-      <div className="bg-slate-50/80 p-3.5 rounded-xl border border-slate-200/80 space-y-2">
-        <div className="flex items-center justify-between text-xs text-slate-600">
-          <span className="font-bold text-slate-800 uppercase tracking-wider text-[10px]">
+      <div className="bg-background-subtle p-4 rounded-xl border border-border space-y-2.5">
+        <div className="flex items-center justify-between text-xs text-ink-secondary">
+          <span className="font-bold text-ink uppercase tracking-wider text-[10px]">
             Decompose By Domain Preset:
           </span>
-          <span className="text-[11px] text-slate-400">
+          <span className="text-[11px] text-ink-muted">
             Click to auto-generate comprehensive domain criteria via Gemini API
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
           <button
             onClick={() => generateMutation.mutate("scholarship")}
             disabled={generateMutation.isPending}
-            className="p-2.5 rounded-lg border border-slate-200 bg-white hover:border-blue-400 hover:shadow-xs transition-all text-left flex items-start gap-2.5"
+            className="p-3 rounded-lg border border-border bg-surface hover:border-secondary hover:shadow-subtle transition-all text-left flex items-start gap-2.5"
           >
-            <div className="p-1.5 rounded-md bg-blue-50 text-blue-600 shrink-0 mt-0.5">
+            <div className="p-1.5 rounded-md bg-secondary-light text-secondary shrink-0 mt-0.5">
               <GraduationCap className="w-4 h-4" />
             </div>
             <div>
-              <div className="font-bold text-slate-900">Government Scholarship</div>
-              <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">
+              <div className="font-bold text-ink">Government Scholarship</div>
+              <p className="text-[11px] text-ink-secondary mt-0.5 leading-snug">
                 Eligibility, Academics, Income ceilings, Documents, Deadlines, Renewal & Exceptions.
               </p>
             </div>
@@ -314,14 +316,14 @@ export const ResearchPlanPage: React.FC = () => {
           <button
             onClick={() => generateMutation.mutate("business")}
             disabled={generateMutation.isPending}
-            className="p-2.5 rounded-lg border border-slate-200 bg-white hover:border-blue-400 hover:shadow-xs transition-all text-left flex items-start gap-2.5"
+            className="p-3 rounded-lg border border-border bg-surface hover:border-secondary hover:shadow-subtle transition-all text-left flex items-start gap-2.5"
           >
-            <div className="p-1.5 rounded-md bg-emerald-50 text-emerald-600 shrink-0 mt-0.5">
+            <div className="p-1.5 rounded-md bg-secondary-light text-secondary shrink-0 mt-0.5">
               <Briefcase className="w-4 h-4" />
             </div>
             <div>
-              <div className="font-bold text-slate-900">Business Research</div>
-              <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">
+              <div className="font-bold text-ink">Business Research</div>
+              <p className="text-[11px] text-ink-secondary mt-0.5 leading-snug">
                 TAM sizing, Unit Economics, LTV/CAC, Regulatory moats, Customer channels & Risks.
               </p>
             </div>
@@ -330,14 +332,14 @@ export const ResearchPlanPage: React.FC = () => {
           <button
             onClick={() => generateMutation.mutate("government_service")}
             disabled={generateMutation.isPending}
-            className="p-2.5 rounded-lg border border-slate-200 bg-white hover:border-blue-400 hover:shadow-xs transition-all text-left flex items-start gap-2.5"
+            className="p-3 rounded-lg border border-border bg-surface hover:border-secondary hover:shadow-subtle transition-all text-left flex items-start gap-2.5"
           >
-            <div className="p-1.5 rounded-md bg-purple-50 text-purple-600 shrink-0 mt-0.5">
+            <div className="p-1.5 rounded-md bg-secondary-light text-secondary shrink-0 mt-0.5">
               <Landmark className="w-4 h-4" />
             </div>
             <div>
-              <div className="font-bold text-slate-900">Government Service</div>
-              <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">
+              <div className="font-bold text-ink">Government Service</div>
+              <p className="text-[11px] text-ink-secondary mt-0.5 leading-snug">
                 Statutory entitlement, Identity proofs, Processing SLAs, Appeal rights & Compliance.
               </p>
             </div>
@@ -347,17 +349,17 @@ export const ResearchPlanPage: React.FC = () => {
 
       {/* Metrics Summary Strip */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="p-3.5 rounded-xl border border-slate-200 bg-white shadow-xs">
-          <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+        <div className="p-3.5 rounded-xl border border-border bg-surface shadow-card">
+          <div className="text-[10px] uppercase font-bold text-ink-muted tracking-wider">
             Total Evaluation Criteria
           </div>
-          <div className="text-xl font-extrabold text-slate-900 mt-0.5">
+          <div className="text-xl font-extrabold text-ink mt-0.5">
             {plan?.total_requirements || 0}
           </div>
-          <span className="text-[10px] text-slate-500">Decomposed research dimensions</span>
+          <span className="text-[10px] text-ink-muted">Decomposed research dimensions</span>
         </div>
 
-        <div className="p-3.5 rounded-xl border border-emerald-200 bg-emerald-50/40 shadow-xs">
+        <div className="p-3.5 rounded-xl border border-status-success-border bg-status-success-bg/40 shadow-card">
           <div className="text-[10px] uppercase font-bold text-emerald-700 tracking-wider flex items-center gap-1">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
             Official Approved
@@ -368,40 +370,40 @@ export const ResearchPlanPage: React.FC = () => {
           <span className="text-[10px] text-emerald-700 font-medium">Included in investigation scope</span>
         </div>
 
-        <div className="p-3.5 rounded-xl border border-blue-200 bg-blue-50/40 shadow-xs">
-          <div className="text-[10px] uppercase font-bold text-blue-700 tracking-wider flex items-center gap-1">
-            <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+        <div className="p-3.5 rounded-xl border border-secondary/20 bg-secondary-light/40 shadow-card">
+          <div className="text-[10px] uppercase font-bold text-secondary tracking-wider flex items-center gap-1">
+            <Sparkles className="w-3.5 h-3.5 text-secondary" />
             AI Suggestions
           </div>
-          <div className="text-xl font-extrabold text-blue-900 mt-0.5">
+          <div className="text-xl font-extrabold text-ink mt-0.5">
             {plan?.ai_suggested_count || 0}
           </div>
-          <span className="text-[10px] text-blue-700 font-medium">Awaiting review & approval</span>
+          <span className="text-[10px] text-ink-secondary font-medium">Awaiting review & approval</span>
         </div>
 
-        <div className="p-3.5 rounded-xl border border-rose-200 bg-rose-50/40 shadow-xs">
-          <div className="text-[10px] uppercase font-bold text-rose-700 tracking-wider flex items-center gap-1">
-            <ShieldAlert className="w-3.5 h-3.5 text-rose-600" />
+        <div className="p-3.5 rounded-xl border border-status-danger-border bg-status-danger-bg/40 shadow-card">
+          <div className="text-[10px] uppercase font-bold text-status-danger tracking-wider flex items-center gap-1">
+            <ShieldAlert className="w-3.5 h-3.5 text-status-danger" />
             Decision-Critical
           </div>
-          <div className="text-xl font-extrabold text-rose-900 mt-0.5">
+          <div className="text-xl font-extrabold text-status-danger mt-0.5">
             {plan?.decision_critical_count || 0}
           </div>
-          <span className="text-[10px] text-rose-700 font-medium">Dealbreaker gatekeepers (P0)</span>
+          <span className="text-[10px] text-status-danger font-medium">Dealbreaker gatekeepers (P0)</span>
         </div>
       </div>
 
       {/* Toolbar: Search & Tab Filters */}
-      <div className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-3">
+      <div className="bg-surface p-3.5 rounded-xl border border-border shadow-card flex flex-wrap items-center justify-between gap-3">
         {/* Left: Search input */}
         <div className="relative w-full sm:w-80">
-          <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search questions or criteria..."
-            className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:bg-white focus:outline-hidden focus:ring-1 focus:ring-primary"
+            className="w-full pl-8 pr-3 py-1.5 text-xs bg-background/50 border border-border rounded-lg text-ink focus:bg-surface focus:outline-hidden focus:ring-1 focus:ring-secondary"
           />
         </div>
 
@@ -412,8 +414,8 @@ export const ResearchPlanPage: React.FC = () => {
             className={cn(
               "px-3 py-1.5 rounded-lg font-medium transition-all",
               activeTab === "all"
-                ? "bg-[#172B45] text-white shadow-xs"
-                : "text-slate-600 hover:bg-slate-100"
+                ? "bg-primary text-white shadow-subtle"
+                : "text-ink-secondary hover:bg-background hover:text-ink"
             )}
           >
             All ({requirements.length})
@@ -423,8 +425,8 @@ export const ResearchPlanPage: React.FC = () => {
             className={cn(
               "px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1",
               activeTab === "official"
-                ? "bg-[#23865B] text-white shadow-xs"
-                : "text-slate-600 hover:bg-slate-100"
+                ? "bg-status-success text-white shadow-subtle"
+                : "text-ink-secondary hover:bg-background hover:text-ink"
             )}
           >
             <span>Official Approved</span>
@@ -437,8 +439,8 @@ export const ResearchPlanPage: React.FC = () => {
             className={cn(
               "px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1",
               activeTab === "suggested"
-                ? "bg-blue-600 text-white shadow-xs"
-                : "text-slate-600 hover:bg-slate-100"
+                ? "bg-secondary text-white shadow-subtle"
+                : "text-ink-secondary hover:bg-background hover:text-ink"
             )}
           >
             <span>AI Suggestions</span>

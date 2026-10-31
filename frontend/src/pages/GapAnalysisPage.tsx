@@ -177,17 +177,17 @@ export const GapAnalysisPage: React.FC = () => {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/80 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-5">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-mono text-slate-500 uppercase">CORE INTELLIGENCE MODULE</span>
+            <span className="text-xs font-mono text-ink-muted uppercase">CORE INTELLIGENCE MODULE</span>
             <Badge variant="secondary" className="text-[10px]">6-CATEGORY EVALUATION</Badge>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
-            <EyeOff className="w-6 h-6 text-slate-800" />
+          <h1 className="text-2xl font-bold tracking-tight text-ink flex items-center gap-2">
+            <EyeOff className="w-6 h-6 text-secondary" />
             <span>Information Gap & Sufficiency Engine</span>
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-ink-secondary mt-0.5">
             Determines whether ingested evidence is sufficient, missing, incomplete, conflicting, outdated, or unverified.
           </p>
         </div>
@@ -195,8 +195,8 @@ export const GapAnalysisPage: React.FC = () => {
         <div className="flex items-center gap-2">
           {id && (
             <Link to={`/research/${id}/evidence`}>
-              <Button variant="outline" size="sm" className="text-xs gap-1.5 border-slate-200">
-                <Layers className="w-3.5 h-3.5 text-navy-800" />
+              <Button variant="outline" size="sm" className="text-xs gap-1.5 border-border bg-surface">
+                <Layers className="w-3.5 h-3.5 text-secondary" />
                 <span>Evidence Explorer</span>
               </Button>
             </Link>
@@ -207,7 +207,7 @@ export const GapAnalysisPage: React.FC = () => {
             variant="primary"
             onClick={() => evaluateGapsMutation.mutate()}
             disabled={evaluateGapsMutation.isPending}
-            className="text-xs gap-1.5"
+            className="text-xs gap-1.5 shadow-subtle"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${evaluateGapsMutation.isPending ? "animate-spin" : ""}`} />
             <span>Re-run Gap Detection</span>
@@ -216,22 +216,22 @@ export const GapAnalysisPage: React.FC = () => {
       </div>
 
       {/* Epistemic Boundary Alert */}
-      <div className="bg-navy-50/60 border border-navy-100 rounded-xl p-4 text-xs text-navy-900 flex items-start gap-3">
-        <Info className="w-4 h-4 text-navy-700 shrink-0 mt-0.5" />
+      <div className="bg-secondary-light/60 border border-secondary/20 rounded-xl p-4 text-xs text-ink flex items-start gap-3">
+        <Info className="w-4 h-4 text-secondary shrink-0 mt-0.5" />
         <div className="space-y-0.5 leading-relaxed">
-          <p className="font-semibold text-navy-950">
+          <p className="font-semibold text-ink">
             Epistemic Boundary Principle: Absence of Evidence Is Not Proof of Falsehood
           </p>
-          <p className="text-navy-700 text-[11px]">
-            A finding marked <strong className="text-rose-700 font-bold">MISSING</strong> signifies that the reviewed documents are silent on this criterion. It must never be interpreted as confirmation that a policy, condition, or limitation does not exist.
+          <p className="text-ink-secondary text-[11px]">
+            A finding marked <strong className="text-status-danger font-bold">MISSING</strong> signifies that the reviewed documents are silent on this criterion. It must never be interpreted as confirmation that a policy, condition, or limitation does not exist.
           </p>
         </div>
       </div>
 
       {/* Success Notification */}
       {statusMessage && (
-        <div className="flex items-center gap-2 p-3 text-xs bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg animate-in fade-in">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+        <div className="flex items-center gap-2 p-3 text-xs bg-status-success-bg border border-status-success-border text-status-success rounded-lg animate-in fade-in">
+          <CheckCircle2 className="w-4 h-4 text-status-success shrink-0" />
           <span>{statusMessage}</span>
         </div>
       )}
@@ -249,22 +249,22 @@ export const GapAnalysisPage: React.FC = () => {
               onClick={() => setSelectedFilter(isSelected ? "ALL" : type.id)}
               className={`p-3 rounded-xl border text-left transition-all flex flex-col justify-between space-y-2 cursor-pointer ${
                 isSelected
-                  ? "ring-2 ring-navy-900 border-navy-900 bg-white shadow-sm"
-                  : "bg-white border-slate-200 hover:border-slate-300 shadow-xs"
+                  ? "ring-2 ring-primary border-primary bg-surface shadow-subtle"
+                  : "bg-surface border-border hover:border-border-strong shadow-card"
               }`}
             >
               <div className="flex items-center justify-between w-full">
-                <span className="text-[11px] font-semibold text-slate-600 truncate">{type.label}</span>
-                <span className="text-xs font-mono font-bold text-slate-900">{count}</span>
+                <span className="text-[11px] font-semibold text-ink-secondary truncate">{type.label}</span>
+                <span className="text-xs font-mono font-bold text-ink">{count}</span>
               </div>
-              <div className="w-full h-1 rounded-full bg-slate-100 overflow-hidden">
+              <div className="w-full h-1 rounded-full bg-background-subtle overflow-hidden">
                 <div
                   className={`h-full ${
-                    type.id === "COVERED" ? "bg-emerald-500" :
-                    type.id === "MISSING" ? "bg-rose-500" :
-                    type.id === "INCOMPLETE" ? "bg-amber-500" :
-                    type.id === "POTENTIAL CONFLICT" ? "bg-purple-500" :
-                    type.id === "POTENTIALLY OUTDATED" ? "bg-orange-500" : "bg-slate-500"
+                    type.id === "COVERED" ? "bg-[#23865B]" :
+                    type.id === "MISSING" ? "bg-[#C65353]" :
+                    type.id === "INCOMPLETE" ? "bg-[#C28A32]" :
+                    type.id === "POTENTIAL CONFLICT" ? "bg-[#C65353]" :
+                    type.id === "POTENTIALLY OUTDATED" ? "bg-[#C28A32]" : "bg-[#315B83]"
                   }`}
                   style={{ width: `${counts.all > 0 ? (count / counts.all) * 100 : 0}%` }}
                 />
@@ -275,17 +275,17 @@ export const GapAnalysisPage: React.FC = () => {
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white border border-slate-200/90 rounded-xl p-4 shadow-card space-y-3">
+      <div className="bg-surface border border-border rounded-xl p-4 shadow-card space-y-3">
         <div className="flex flex-col sm:flex-row items-center gap-3">
           {/* Search Input */}
           <div className="relative flex-1 w-full">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-ink-muted absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search requirements, explanations, or recommended actions..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full text-xs bg-slate-50/50 border border-slate-200 rounded-lg pl-9 pr-8 py-2 focus:outline-none focus:ring-1 focus:ring-navy-800"
+              className="w-full text-xs bg-background/50 border border-border rounded-lg pl-9 pr-8 py-2 focus:outline-none focus:ring-1 focus:ring-secondary text-ink focus:bg-surface"
             />
             {searchQuery && (
               <button

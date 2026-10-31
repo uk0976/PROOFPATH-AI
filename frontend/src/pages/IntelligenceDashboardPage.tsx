@@ -326,9 +326,9 @@ export const IntelligenceDashboardPage: React.FC = () => {
     { name: "Covered", count: coveredCount, fill: "#23865B" },
     { name: "Missing", count: missingCount, fill: "#C65353" },
     { name: "Incomplete", count: incompleteCount, fill: "#C28A32" },
-    { name: "Conflict", count: conflictCount, fill: "#E06C75" },
-    { name: "Outdated", count: outdatedCount, fill: "#D97706" },
-    { name: "Unverified", count: unverifiedCount, fill: "#8B5CF6" },
+    { name: "Conflict", count: conflictCount, fill: "#C65353" },
+    { name: "Outdated", count: outdatedCount, fill: "#C28A32" },
+    { name: "Unverified", count: unverifiedCount, fill: "#315B83" },
   ]
 
   // Recharts Visualization 3: Source Analysis Summary (Format & Freshness)
@@ -337,9 +337,9 @@ export const IntelligenceDashboardPage: React.FC = () => {
     const urls = currentSources.filter((s) => s.source_type === "url").length
     const text = currentSources.filter((s) => s.source_type === "text").length
     return [
-      { format: "PDF Documents", count: pdfs, chunks: currentSources.filter((s) => s.source_type === "pdf").reduce((sum, s) => sum + (s.chunk_count || 1), 0), fill: "#315B83" },
-      { format: "Web URLs", count: urls, chunks: currentSources.filter((s) => s.source_type === "url").reduce((sum, s) => sum + (s.chunk_count || 1), 0), fill: "#2B6CB0" },
-      { format: "Direct Text", count: text, chunks: currentSources.filter((s) => s.source_type === "text").reduce((sum, s) => sum + (s.chunk_count || 1), 0), fill: "#4A5568" },
+      { format: "PDF Documents", count: pdfs, chunks: currentSources.filter((s) => s.source_type === "pdf").reduce((sum, s) => sum + (s.chunk_count || 1), 0), fill: "#172B45" },
+      { format: "Web URLs", count: urls, chunks: currentSources.filter((s) => s.source_type === "url").reduce((sum, s) => sum + (s.chunk_count || 1), 0), fill: "#315B83" },
+      { format: "Direct Text", count: text, chunks: currentSources.filter((s) => s.source_type === "text").reduce((sum, s) => sum + (s.chunk_count || 1), 0), fill: "#687586" },
     ]
   }, [currentSources])
 
@@ -351,13 +351,40 @@ export const IntelligenceDashboardPage: React.FC = () => {
     const low = allFindings.filter((f) => f.priority?.toLowerCase() === "low").length
     return [
       { priority: "Critical", count: critical, fill: "#C65353" },
-      { priority: "High", count: high, fill: "#E06C75" },
+      { priority: "High", count: high, fill: "#D97706" },
       { priority: "Medium", count: medium, fill: "#C28A32" },
       { priority: "Low", count: low, fill: "#23865B" },
     ]
   }, [allFindings])
 
-  // Export Report Handler
+  // Export Report Handlers
+  const [isExportingPdf, setIsExportingPdf] = useState<boolean>(false)
+
+  const handleExportPdfReport = async () => {
+    if (!id) return
+    setIsExportingPdf(true)
+    try {
+      if (id === "demo") {
+        navigate(`/report/${id}`)
+      } else {
+        const blob = await reportService.downloadPdfReport(id)
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement("a")
+        a.href = url
+        a.download = `ProofPath_Report_${id.slice(0, 8)}.pdf`
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        document.body.removeChild(a)
+      }
+    } catch (err) {
+      console.error("Export PDF failed, navigating to report view", err)
+      navigate(`/report/${id}`)
+    } finally {
+      setIsExportingPdf(false)
+    }
+  }
+
   const handleExportReport = async () => {
     if (!id) return
     setIsExporting(true)
@@ -456,8 +483,9 @@ export const IntelligenceDashboardPage: React.FC = () => {
               <Badge variant={currentSession.status === "completed" ? "success" : currentSession.status === "processing" ? "warning" : "secondary"}>
                 {currentSession.status.toUpperCase()}
               </Badge>
-              <Badge variant="outline" className="border-secondary/30 text-secondary font-mono text-[10px]">
-                FASTAPI REAL-TIME SYNC
+              <Badge variant="outline" className="border-emerald-300 bg-emerald-50 text-emerald-800 font-mono text-[10px] flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                Live Verification
               </Badge>
             </div>
 
@@ -481,24 +509,39 @@ export const IntelligenceDashboardPage: React.FC = () => {
 
           {/* Action Strip & Investigation Switcher */}
           <div className="flex flex-col sm:flex-row lg:flex-col items-end gap-3 shrink-0">
-            <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
               <Button
                 variant="primary"
                 size="sm"
-                onClick={handleExportReport}
-                disabled={isExporting}
+                onClick={handleExportPdfReport}
+                disabled={isExportingPdf}
                 className="gap-1.5 w-full sm:w-auto shadow-subtle"
               >
-                {isExporting ? (
+                {isExportingPdf ? (
                   <RefreshCw className="w-3.5 h-3.5 animate-spin" />
                 ) : (
                   <Download className="w-3.5 h-3.5" />
                 )}
-                <span>Export Report (.md)</span>
+                <span>Download PDF Dossier</span>
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportReport}
+                disabled={isExporting}
+                className="gap-1.5 w-full sm:w-auto bg-surface"
+              >
+                {isExporting ? (
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <FileText className="w-3.5 h-3.5 text-ink-muted" />
+                )}
+                <span>Export .md</span>
               </Button>
 
               <Link to={`/evidence/${id}`}>
-                <Button variant="secondary" size="sm" className="gap-1.5">
+                <Button variant="secondary" size="sm" className="gap-1.5 w-full sm:w-auto">
                   <GitBranch className="w-3.5 h-3.5 text-secondary" />
                   <span>Evidence Graph</span>
                 </Button>
@@ -576,7 +619,7 @@ export const IntelligenceDashboardPage: React.FC = () => {
       {/* =========================================================================
           2. KEY METRICS STRIP: 7 Real Investigation Metric Cards
           ========================================================================= */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
         {/* Metric 1: Total Sources */}
         <div className="p-4 rounded-xl border border-border bg-surface shadow-card space-y-1">
           <div className="flex items-center justify-between text-ink-muted">
@@ -621,9 +664,9 @@ export const IntelligenceDashboardPage: React.FC = () => {
         <div className="p-4 rounded-xl border border-border bg-surface shadow-card space-y-1">
           <div className="flex items-center justify-between text-ink-muted">
             <span className="text-[10px] font-semibold uppercase tracking-wider">Conflicts</span>
-            <AlertTriangle className="w-3.5 h-3.5 text-[#E06C75]" />
+            <AlertTriangle className="w-3.5 h-3.5 text-status-danger" />
           </div>
-          <div className="text-2xl font-extrabold text-[#E06C75]">{conflictCount}</div>
+          <div className="text-2xl font-extrabold text-status-danger">{conflictCount}</div>
           <span className="text-[10px] text-ink-muted block truncate">Cross-source clashes</span>
         </div>
 
@@ -631,19 +674,19 @@ export const IntelligenceDashboardPage: React.FC = () => {
         <div className="p-4 rounded-xl border border-border bg-surface shadow-card space-y-1">
           <div className="flex items-center justify-between text-ink-muted">
             <span className="text-[10px] font-semibold uppercase tracking-wider">Outdated</span>
-            <Clock className="w-3.5 h-3.5 text-[#D97706]" />
+            <Clock className="w-3.5 h-3.5 text-status-warning" />
           </div>
-          <div className="text-2xl font-extrabold text-[#D97706]">{outdatedCount}</div>
+          <div className="text-2xl font-extrabold text-status-warning">{outdatedCount}</div>
           <span className="text-[10px] text-ink-muted block truncate">Superseded or expired</span>
         </div>
 
         {/* Metric 7: Unverified Claims */}
-        <div className="p-4 rounded-xl border border-border bg-surface shadow-card space-y-1">
+        <div className="p-4 rounded-xl border border-border bg-surface shadow-card space-y-1 col-span-2 sm:col-span-1">
           <div className="flex items-center justify-between text-ink-muted">
             <span className="text-[10px] font-semibold uppercase tracking-wider">Unverified</span>
-            <HelpCircle className="w-3.5 h-3.5 text-[#8B5CF6]" />
+            <HelpCircle className="w-3.5 h-3.5 text-secondary" />
           </div>
-          <div className="text-2xl font-extrabold text-[#8B5CF6]">{unverifiedCount}</div>
+          <div className="text-2xl font-extrabold text-secondary">{unverifiedCount}</div>
           <span className="text-[10px] text-ink-muted block truncate">Uncorroborated items</span>
         </div>
       </div>

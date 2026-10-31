@@ -85,22 +85,54 @@ export const DashboardPage: React.FC = () => {
 
       {/* Session Cards */}
       {isLoading ? (
-        <div className="p-12 text-center text-xs text-ink-secondary">
-          Loading investigation dossiers...
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="bg-surface border border-border rounded-xl p-5 shadow-card animate-pulse flex flex-col md:flex-row md:items-center justify-between gap-5"
+            >
+              <div className="space-y-2.5 w-full max-w-xl">
+                <div className="flex items-center gap-2.5">
+                  <div className="h-5 w-48 bg-border/60 rounded" />
+                  <div className="h-4 w-16 bg-border/40 rounded-full" />
+                </div>
+                <div className="h-3.5 w-full bg-border/40 rounded" />
+                <div className="flex items-center gap-4 pt-1">
+                  <div className="h-3 w-20 bg-border/40 rounded" />
+                  <div className="h-3 w-20 bg-border/40 rounded" />
+                  <div className="h-3 w-20 bg-border/40 rounded" />
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-24 bg-border/40 rounded-lg" />
+                <div className="h-9 w-20 bg-border/40 rounded-lg" />
+              </div>
+            </div>
+          ))}
         </div>
       ) : filteredSessions?.length === 0 ? (
-        <div className="border border-dashed border-border-strong rounded-xl p-12 text-center space-y-3 bg-surface">
-          <ShieldAlert className="w-8 h-8 text-ink-muted mx-auto" />
-          <h3 className="text-sm font-semibold text-ink">No investigations found</h3>
-          <p className="text-xs text-ink-secondary max-w-sm mx-auto">
-            Create your first forensic research dossier to cross-examine claims across multiple sources.
-          </p>
-          <Link to="/research">
-            <Button size="sm" variant="primary">
-              <Plus className="w-3.5 h-3.5" />
-              <span>Create Investigation</span>
-            </Button>
-          </Link>
+        <div className="border border-dashed border-border-strong rounded-2xl p-12 text-center space-y-4 bg-surface">
+          <ShieldAlert className="w-10 h-10 text-ink-muted mx-auto" />
+          <div className="space-y-1">
+            <h3 className="text-base font-semibold text-ink">No investigations found</h3>
+            <p className="text-xs text-ink-secondary max-w-sm mx-auto">
+              Create your first forensic research dossier or explore our prepared scholarship demonstration.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-2.5 pt-2">
+            <Link to="/demo">
+              <Button size="sm" variant="outline" className="border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100 font-medium">
+                <Sparkles className="w-3.5 h-3.5 text-amber-600 mr-1.5" />
+                <span>Explore Scholarship Demo</span>
+              </Button>
+            </Link>
+            <Link to="/research">
+              <Button size="sm" variant="primary">
+                <Plus className="w-3.5 h-3.5 mr-1" />
+                <span>Create Investigation</span>
+              </Button>
+            </Link>
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4">
@@ -114,7 +146,7 @@ export const DashboardPage: React.FC = () => {
                 className="bg-surface border border-border rounded-xl p-5 shadow-card hover:border-border-strong transition-all flex flex-col md:flex-row md:items-center justify-between gap-5"
               >
                 <div className="space-y-2 max-w-2xl">
-                  <div className="flex items-center gap-2.5">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="font-semibold text-ink text-base leading-snug">
                       {session.title}
                     </span>
@@ -122,7 +154,7 @@ export const DashboardPage: React.FC = () => {
                       {session.status.toUpperCase()}
                     </Badge>
                     {isDemo && (
-                      <Badge variant="outline" className="text-[10px] font-mono text-secondary">
+                      <Badge variant="outline" className="text-[10px] font-mono text-amber-800 border-amber-200 bg-amber-50">
                         SAMPLE DATA
                       </Badge>
                     )}
@@ -151,12 +183,12 @@ export const DashboardPage: React.FC = () => {
                 </div>
 
                 {/* Score & Action Button */}
-                <div className="flex items-center gap-5 shrink-0 self-end md:self-center">
+                <div className="flex items-center gap-4 shrink-0 self-start md:self-center">
                   <div className="text-right">
                     <div className="text-2xl font-bold text-ink">
                       {session.readiness_score.toFixed(1)}%
                     </div>
-                    <span className={`text-[11px] font-semibold px-2 py-0.5 rounded border ${tier.bgColor} ${tier.color} ${tier.borderColor}`}>
+                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded border ${tier.bgColor} ${tier.color} ${tier.borderColor}`}>
                       {tier.tier}
                     </span>
                   </div>
