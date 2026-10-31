@@ -669,44 +669,28 @@ class PipelineOrchestrator:
         reqs: List[Requirement],
         claims_per_req: Dict[str, List[Dict[str, Any]]]
     ) -> List[Contradiction]:
-        """Stage 10: Cross-examines competing claims to detect contradictions."""
-        conflict_agent = ContradictionAnalyzerAgent()
-        all_conflicts = []
-
-        # Clear existing contradictions for idempotency
-        self.db.query(Contradiction).filter(Contradiction.session_id == self.session_id).delete()
-
-        for req in reqs:
-            req_claims = claims_per_req.get(req.id, [])
-            if len(req_claims) >= 2:
-                detected_conflicts = await conflict_agent.analyze_conflicts(
-                    requirement_text=req.requirement_text,
-                    claims=req_claims
-                )
-                for dc in detected_conflicts:
-                    conflict = Contradiction(
-                        session_id=self.session_id,
-                        requirement_id=req.id,
-                        claim_a_id=dc["claim_a_id"],
-                        claim_b_id=dc["claim_b_id"],
-                        severity=dc.get("severity", "medium"),
-                        conflicting_aspect=dc.get("conflicting_aspect", "Conflicting metrics or limits"),
-                        synthesis_verdict=dc.get("synthesis_verdict", "Divergent claims across sources")
-                    )
-                    self.db.add(conflict)
-                    all_conflicts.append(conflict)
-                    req.status = "conflict"
-
-        self.db.commit()
-        return all_conflicts
+        """Stage 10: 10-dimensional cross-source contradiction intelligence."""
+        from app.intelligence.contradiction_intelligence_engine import ContradictionIntelligenceEngine
+        conflicts = ContradictionIntelligenceEngine.evaluate_session_contradictions(
+            db=self.db,
+            session_id=self.session_id,
+            persist=True
+        )
+        return conflicts
 
     async def _stage_11_temporal_analysis(
         self,
         sources: List[Source],
         claims: List[AtomicClaim]
     ) -> List[Dict[str, Any]]:
-        """Stage 11: Audits publication dates and temporal decay."""
-        return TemporalAnalyzerAgent.audit_temporal_freshness(sources, claims)
+        """Stage 11: Forensic temporal intelligence and applicability assessment."""
+        from app.intelligence.temporal_intelligence_engine import TemporalIntelligenceEngine
+        audit_result = TemporalIntelligenceEngine.audit_session_temporal(
+            db=self.db,
+            session_id=self.session_id,
+            persist=True
+        )
+        return audit_result.get("audits", [])
 
     async def _stage_12_blindspot_discovery(
         self,

@@ -10,6 +10,7 @@ import { InvestigationProgressPage } from "@/pages/InvestigationProgressPage"
 import { IntelligenceDashboardPage } from "@/pages/IntelligenceDashboardPage"
 import { SourcesPage } from "@/pages/SourcesPage"
 import { GapAnalysisPage } from "@/pages/GapAnalysisPage"
+import { ContradictionExplorerPage } from "@/pages/ContradictionExplorerPage"
 import { EvidenceExplorerPage } from "@/pages/EvidenceExplorerPage"
 import { BlindSpotPage } from "@/pages/BlindSpotPage"
 import { VerificationPage } from "@/pages/VerificationPage"
@@ -44,6 +45,10 @@ export const router = createBrowserRouter([
 
       // 7. Gap Analysis
       { path: "gaps/:id", element: <GapAnalysisPage /> },
+
+      // 7b. Cross-Source Contradictions & Temporal Intelligence
+      { path: "contradictions/:id", element: <ContradictionExplorerPage /> },
+      { path: "temporal/:id", element: <ContradictionExplorerPage /> },
 
       // 8. Evidence Explorer / Graph
       { path: "evidence/:id", element: <EvidenceExplorerPage /> },

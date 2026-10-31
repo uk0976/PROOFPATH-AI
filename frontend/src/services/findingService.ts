@@ -9,6 +9,7 @@ import {
   MatrixViewData,
   GapFindingItem,
   GapAnalysisOverviewData,
+  TemporalAuditOverviewData,
 } from "@/types"
 
 export interface FindingsOverview {
@@ -32,8 +33,23 @@ export const findingService = {
     return res.data
   },
 
-  async getConflicts(sessionId: string): Promise<ContradictionItem[]> {
-    const res = await apiClient.get<ContradictionItem[]>(`/findings/${sessionId}/conflicts`)
+  async getConflicts(sessionId: string, params?: { is_genuine?: boolean; severity?: string }): Promise<ContradictionItem[]> {
+    const res = await apiClient.get<ContradictionItem[]>(`/research/${sessionId}/contradictions`, { params })
+    return res.data
+  },
+
+  async evaluateContradictions(sessionId: string): Promise<ContradictionItem[]> {
+    const res = await apiClient.post<ContradictionItem[]>(`/research/${sessionId}/evaluate-contradictions`)
+    return res.data
+  },
+
+  async getForensicTemporalAudit(sessionId: string): Promise<TemporalAuditOverviewData> {
+    const res = await apiClient.get<TemporalAuditOverviewData>(`/research/${sessionId}/temporal`)
+    return res.data
+  },
+
+  async evaluateTemporal(sessionId: string): Promise<TemporalAuditOverviewData> {
+    const res = await apiClient.post<TemporalAuditOverviewData>(`/research/${sessionId}/evaluate-temporal`)
     return res.data
   },
 

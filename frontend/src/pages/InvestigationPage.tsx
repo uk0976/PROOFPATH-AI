@@ -13,6 +13,7 @@ import {
   RefreshCw,
   Sparkles,
   Layers,
+  Scale,
 } from "lucide-react"
 import { researchService } from "@/services/researchService"
 import { findingService } from "@/services/findingService"
@@ -220,6 +221,12 @@ export const InvestigationPage: React.FC = () => {
                 <div className="px-3 py-2 rounded-lg border border-border hover:border-secondary bg-surface text-xs font-medium text-ink transition-all flex items-center gap-2 shadow-subtle">
                   <AlertTriangle className="w-3.5 h-3.5 text-status-warning" />
                   <span>Gap Analysis</span>
+                </div>
+              </Link>
+              <Link to={`/contradictions/${id}`}>
+                <div className="px-3 py-2 rounded-lg border border-border hover:border-secondary bg-surface text-xs font-medium text-ink transition-all flex items-center gap-2 shadow-subtle">
+                  <Scale className="w-3.5 h-3.5 text-secondary" />
+                  <span>Contradictions & Temporal</span>
                 </div>
               </Link>
               <Link to={`/blindspots/${id}`}>

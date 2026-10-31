@@ -122,11 +122,38 @@ export interface ClaimSnippet {
   source_id: string
   source_title: string
   source_type: string
+  source_uri?: string
   page_number?: number
+  paragraph_reference?: string
+  category?: string
   claim_text: string
   exact_quote: string
   date_reference?: string
+  applicable_period?: string
   confidence_score: number
+}
+
+export interface ScopeComparisonData {
+  subject: string
+  category: string
+  geographic_scope_a?: string
+  geographic_scope_b?: string
+  applicant_category_a?: string
+  applicant_category_b?: string
+  academic_year_a?: string
+  academic_year_b?: string
+  application_cycle_a?: string
+  application_cycle_b?: string
+  numerical_value_a?: string
+  numerical_value_b?: string
+  unit_a?: string
+  unit_b?: string
+  effective_date_a?: string
+  effective_date_b?: string
+  conditions_a?: string
+  conditions_b?: string
+  scope_alignment: "aligned" | "partially_aligned" | "divergent" | string
+  divergence_reasons: string[]
 }
 
 export interface ContradictionItem {
@@ -137,6 +164,11 @@ export interface ContradictionItem {
   severity: "high" | "medium" | "low"
   conflicting_aspect: string
   synthesis_verdict?: string
+  is_genuine: boolean
+  conflict_type: "direct_factual_clash" | "numerical_threshold_divergence" | "timeline_conflict" | "scope_divergence" | "conditional_distinction" | string
+  scope_comparison?: ScopeComparisonData
+  explanation?: string
+  recommended_action?: string
   claim_a: ClaimSnippet
   claim_b: ClaimSnippet
   created_at: string
@@ -194,11 +226,34 @@ export interface InformationGapItem {
 export interface TemporalAuditItem {
   source_id: string
   source_title: string
+  source_type: string
+  uri?: string
   publication_date?: string
+  last_modified_date?: string
+  effective_date?: string
+  expiry_date?: string
+  academic_year?: string
+  application_cycle?: string
+  access_date?: string
   age_in_months?: number
-  status: "fresh" | "aging" | "outdated" | "unknown"
-  decay_warning?: string
+  status: "CURRENT_ACTIVE" | "SUPERSEDED" | "EXPIRED" | "DIFFERENT_CYCLE" | "MISSING_METADATA" | "PROVISIONAL_FUTURE" | "AGING" | "FRESH" | string
+  applicability_verdict: string
+  decay_risk: "critical" | "high" | "medium" | "low" | "none" | string
+  superseded_by_source_id?: string
+  superseded_by_title?: string
   stale_claims: ClaimSnippet[]
+  recommended_action?: string
+}
+
+export interface TemporalAuditOverviewData {
+  research_id: string
+  total_sources: number
+  active_sources: number
+  superseded_sources: number
+  expired_sources: number
+  differing_cycle_sources: number
+  missing_metadata_sources: number
+  audits: TemporalAuditItem[]
 }
 
 export interface BlindSpotItem {

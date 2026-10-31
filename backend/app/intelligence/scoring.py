@@ -20,21 +20,22 @@ class DecisionReadinessScorer:
         if total_reqs == 0:
             coverage_score = 0.0
         else:
-            covered_count = sum(1 for r in requirements if r.status == "covered")
+            covered_count = sum(1 for r in requirements if r.status in ["covered", "conflict"])
             partial_count = sum(1 for r in requirements if r.status == "partial")
             coverage_ratio = (covered_count + (0.5 * partial_count)) / total_reqs
             coverage_score = min(100.0, max(0.0, coverage_ratio * 100.0))
 
         # 2. Consistency Factor (weight = 0.30)
-        # Penalty for high and medium contradictions
+        # Penalty strictly for genuine contradictions (false conflicts do not penalize consistency)
         if total_reqs == 0:
             consistency_score = 100.0
         else:
-            high_conflicts = sum(1 for c in contradictions if c.severity == "high")
-            med_conflicts = sum(1 for c in contradictions if c.severity == "medium")
-            low_conflicts = sum(1 for c in contradictions if c.severity == "low")
-            penalty = (high_conflicts * 25.0) + (med_conflicts * 12.0) + (low_conflicts * 5.0)
-            consistency_score = max(0.0, 100.0 - penalty)
+            genuine_conflicts = [c for c in contradictions if getattr(c, "is_genuine", True) is not False]
+            high_conflicts = sum(1 for c in genuine_conflicts if c.severity == "high")
+            med_conflicts = sum(1 for c in genuine_conflicts if c.severity == "medium")
+            low_conflicts = sum(1 for c in genuine_conflicts if c.severity == "low")
+            penalty = (high_conflicts * 20.0) + (med_conflicts * 10.0) + (low_conflicts * 5.0)
+            consistency_score = max(10.0, 100.0 - penalty) if genuine_conflicts else 100.0
 
         # 3. Freshness Factor (weight = 0.15)
         # Check source publication age

@@ -16,6 +16,7 @@ import {
   ShieldCheck,
   Sparkles,
   ListOrdered,
+  Scale,
 } from "lucide-react"
 import { useAppStore } from "@/store/useAppStore"
 import { DEMO_SESSION_ID } from "@/utils/sampleData"
@@ -39,6 +40,7 @@ export const Sidebar: React.FC = () => {
     { label: "Research Plan", path: `/research/${activeSessionId}/plan`, icon: ListOrdered },
     { label: "Sources", path: `/sources/${activeSessionId}`, icon: FileText },
     { label: "Gap Analysis", path: `/gaps/${activeSessionId}`, icon: AlertTriangle },
+    { label: "Contradictions & Temporal", path: `/contradictions/${activeSessionId}`, icon: Scale },
     { label: "Evidence Explorer", path: `/evidence/${activeSessionId}`, icon: GitBranch },
     { label: "BlindSpot Discovery", path: `/blindspots/${activeSessionId}`, icon: HelpCircle },
     { label: "Verification Planner", path: `/verification/${activeSessionId}`, icon: CheckSquare },

@@ -16,6 +16,11 @@ class Source(BaseModel):
     cleaned_content = Column(Text, nullable=True)
     publication_date = Column(DateTime, nullable=True)
     last_modified_date = Column(DateTime, nullable=True)
+    effective_date = Column(DateTime, nullable=True)  # Official policy effective date
+    expiry_date = Column(DateTime, nullable=True)  # Explicit validity or deadline expiration
+    academic_year = Column(String(50), nullable=True)  # e.g. "2024-2025", "2026-2027"
+    application_cycle = Column(String(100), nullable=True)  # e.g. "Fall 2026", "Round 1"
+    access_date = Column(DateTime, nullable=True)  # Timestamp when document was ingested or accessed
     extraction_timestamp = Column(DateTime, nullable=True)
     author_or_publisher = Column(String(255), nullable=True)
     metadata_json = Column(Text, nullable=True)  # JSON string

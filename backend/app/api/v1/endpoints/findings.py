@@ -16,7 +16,10 @@ from app.schemas.findings import (
     ContradictionResponse,
     InformationGapResponse,
     TemporalDecayResponse,
+    TemporalAuditResponse,
+    TemporalAuditItem,
     ClaimSnippet,
+    ScopeComparison,
     GapFindingResponse,
     EvidenceReference,
     GapAnalysisOverview,
@@ -30,6 +33,8 @@ from app.intelligence.gap_detection_engine import (
     FINDING_POTENTIALLY_OUTDATED,
     FINDING_UNVERIFIED,
 )
+from app.intelligence.contradiction_intelligence_engine import ContradictionIntelligenceEngine
+from app.intelligence.temporal_intelligence_engine import TemporalIntelligenceEngine
 from app.agents.temporal_analyzer import TemporalAnalyzerAgent
 from app.core.exceptions import NotFoundError
 
@@ -84,15 +89,26 @@ def _build_contradiction_response(c: Contradiction) -> ContradictionResponse:
     claim_a = c.claim_a
     claim_b = c.claim_b
 
-    source_a_title = claim_a.chunk.source.title if claim_a and claim_a.chunk and claim_a.chunk.source else "Source A"
-    source_a_id = claim_a.chunk.source_id if claim_a and claim_a.chunk else ""
-    source_a_type = claim_a.chunk.source.source_type if claim_a and claim_a.chunk and claim_a.chunk.source else "pdf"
-    page_a = claim_a.chunk.page_number if claim_a and claim_a.chunk else None
+    source_a_title = claim_a.source.title if claim_a and claim_a.source else (claim_a.chunk.source.title if claim_a and claim_a.chunk and claim_a.chunk.source else "Source A")
+    source_a_id = claim_a.source_id or (claim_a.chunk.source_id if claim_a and claim_a.chunk else "")
+    source_a_type = claim_a.source.source_type if claim_a and claim_a.source else (claim_a.chunk.source.source_type if claim_a and claim_a.chunk and claim_a.chunk.source else "pdf")
+    source_a_uri = claim_a.source.uri if claim_a and claim_a.source else (claim_a.chunk.source.uri if claim_a and claim_a.chunk and claim_a.chunk.source else None)
+    page_a = claim_a.page_number or (claim_a.chunk.page_number if claim_a and claim_a.chunk else None)
 
-    source_b_title = claim_b.chunk.source.title if claim_b and claim_b.chunk and claim_b.chunk.source else "Source B"
-    source_b_id = claim_b.chunk.source_id if claim_b and claim_b.chunk else ""
-    source_b_type = claim_b.chunk.source.source_type if claim_b and claim_b.chunk and claim_b.chunk.source else "url"
-    page_b = claim_b.chunk.page_number if claim_b and claim_b.chunk else None
+    source_b_title = claim_b.source.title if claim_b and claim_b.source else (claim_b.chunk.source.title if claim_b and claim_b.chunk and claim_b.chunk.source else "Source B")
+    source_b_id = claim_b.source_id or (claim_b.chunk.source_id if claim_b and claim_b.chunk else "")
+    source_b_type = claim_b.source.source_type if claim_b and claim_b.source else (claim_b.chunk.source.source_type if claim_b and claim_b.chunk and claim_b.chunk.source else "url")
+    source_b_uri = claim_b.source.uri if claim_b and claim_b.source else (claim_b.chunk.source.uri if claim_b and claim_b.chunk and claim_b.chunk.source else None)
+    page_b = claim_b.page_number or (claim_b.chunk.page_number if claim_b and claim_b.chunk else None)
+
+    # Parse 10-dimension scope comparison
+    scope_comp = None
+    if getattr(c, "scope_comparison_json", None):
+        try:
+            scope_dict = json.loads(c.scope_comparison_json)
+            scope_comp = ScopeComparison(**scope_dict)
+        except Exception:
+            scope_comp = None
 
     return ContradictionResponse(
         id=c.id,
@@ -102,27 +118,40 @@ def _build_contradiction_response(c: Contradiction) -> ContradictionResponse:
         severity=c.severity,
         conflicting_aspect=c.conflicting_aspect,
         synthesis_verdict=c.synthesis_verdict,
+        is_genuine=getattr(c, "is_genuine", True),
+        conflict_type=getattr(c, "conflict_type", "direct_factual_clash"),
+        scope_comparison=scope_comp,
+        explanation=getattr(c, "explanation", c.synthesis_verdict),
+        recommended_action=getattr(c, "recommended_action", None),
         claim_a=ClaimSnippet(
             id=claim_a.id,
             source_id=source_a_id,
             source_title=source_a_title,
             source_type=source_a_type,
+            source_uri=source_a_uri,
             page_number=page_a,
+            paragraph_reference=getattr(claim_a, "paragraph_reference", None),
+            category=getattr(claim_a, "category", "General"),
             claim_text=claim_a.claim_text,
             exact_quote=claim_a.exact_quote,
             date_reference=claim_a.date_reference,
-            confidence_score=claim_a.confidence_score,
+            applicable_period=getattr(claim_a, "applicable_period", None),
+            confidence_score=claim_a.confidence_score or 1.0,
         ),
         claim_b=ClaimSnippet(
             id=claim_b.id,
             source_id=source_b_id,
             source_title=source_b_title,
             source_type=source_b_type,
+            source_uri=source_b_uri,
             page_number=page_b,
+            paragraph_reference=getattr(claim_b, "paragraph_reference", None),
+            category=getattr(claim_b, "category", "General"),
             claim_text=claim_b.claim_text,
             exact_quote=claim_b.exact_quote,
             date_reference=claim_b.date_reference,
-            confidence_score=claim_b.confidence_score,
+            applicable_period=getattr(claim_b, "applicable_period", None),
+            confidence_score=claim_b.confidence_score or 1.0,
         ),
         created_at=c.created_at,
     )
@@ -246,19 +275,45 @@ def get_findings_gaps(
 
 
 @router.get("/findings/{research_id}/conflicts", response_model=List[ContradictionResponse])
-def get_findings_conflicts(research_id: str, db: Session = Depends(get_db)):
-    """Retrieves all contradictions and conflicting claim pairs for a session."""
+@router.get("/research/{research_id}/contradictions", response_model=List[ContradictionResponse])
+def get_findings_conflicts(
+    research_id: str,
+    is_genuine: Optional[bool] = Query(None, description="Filter for genuine conflicts (True) vs false conflicts/scope divergence (False)"),
+    severity: Optional[str] = Query(None, description="Filter by severity: high, medium, low"),
+    db: Session = Depends(get_db)
+):
+    """Retrieves all cross-source contradictions and scope comparisons for a session."""
     session = db.query(ResearchSession).filter(ResearchSession.id == research_id).first()
     if not session:
         raise NotFoundError("ResearchSession", research_id)
 
-    conflicts = db.query(Contradiction).filter(Contradiction.session_id == research_id).all()
+    query = db.query(Contradiction).filter(Contradiction.session_id == research_id)
+    if is_genuine is not None:
+        query = query.filter(Contradiction.is_genuine == is_genuine)
+    if severity:
+        query = query.filter(Contradiction.severity == severity.lower())
+
+    conflicts = query.all()
+    if not conflicts and is_genuine is None:
+        # Run intelligence engine if none recorded yet
+        conflicts = ContradictionIntelligenceEngine.evaluate_session_contradictions(db, research_id, persist=True)
+    return [_build_contradiction_response(c) for c in conflicts]
+
+
+@router.post("/research/{research_id}/evaluate-contradictions", response_model=List[ContradictionResponse], status_code=status.HTTP_200_OK)
+def trigger_contradiction_evaluation(research_id: str, db: Session = Depends(get_db)):
+    """Triggers the 10-dimensional cross-source contradiction intelligence engine."""
+    session = db.query(ResearchSession).filter(ResearchSession.id == research_id).first()
+    if not session:
+        raise NotFoundError("ResearchSession", research_id)
+
+    conflicts = ContradictionIntelligenceEngine.evaluate_session_contradictions(db, research_id, persist=True)
     return [_build_contradiction_response(c) for c in conflicts]
 
 
 @router.get("/findings/{research_id}/temporal", response_model=List[TemporalDecayResponse])
 def get_findings_temporal(research_id: str, db: Session = Depends(get_db)):
-    """Audits publication and citation freshness across ingested documents."""
+    """Legacy temporal audit endpoint for backward compatibility."""
     session = db.query(ResearchSession).filter(ResearchSession.id == research_id).first()
     if not session:
         raise NotFoundError("ResearchSession", research_id)
@@ -266,6 +321,28 @@ def get_findings_temporal(research_id: str, db: Session = Depends(get_db)):
     sources = db.query(Source).filter(Source.session_id == research_id).all()
     claims = db.query(AtomicClaim).join(AtomicClaim.chunk).filter(AtomicClaim.chunk.has(source_id=Source.id)).all()
     return TemporalAnalyzerAgent.audit_temporal_freshness(sources, claims)
+
+
+@router.get("/research/{research_id}/temporal", response_model=TemporalAuditResponse)
+def get_research_temporal_audit(research_id: str, db: Session = Depends(get_db)):
+    """Comprehensive forensic temporal intelligence audit across sources and claims."""
+    session = db.query(ResearchSession).filter(ResearchSession.id == research_id).first()
+    if not session:
+        raise NotFoundError("ResearchSession", research_id)
+
+    result = TemporalIntelligenceEngine.audit_session_temporal(db, research_id, persist=False)
+    return TemporalAuditResponse(**result)
+
+
+@router.post("/research/{research_id}/evaluate-temporal", response_model=TemporalAuditResponse, status_code=status.HTTP_200_OK)
+def trigger_temporal_evaluation(research_id: str, db: Session = Depends(get_db)):
+    """Triggers full temporal extraction and document applicability assessment."""
+    session = db.query(ResearchSession).filter(ResearchSession.id == research_id).first()
+    if not session:
+        raise NotFoundError("ResearchSession", research_id)
+
+    result = TemporalIntelligenceEngine.audit_session_temporal(db, research_id, persist=True)
+    return TemporalAuditResponse(**result)
 
 
 @router.get("/findings/{finding_id}")

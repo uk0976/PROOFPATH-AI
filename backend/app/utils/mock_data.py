@@ -1,3 +1,4 @@
+import json
 from datetime import datetime, timezone, timedelta
 from sqlalchemy.orm import Session
 from app.models import (
@@ -165,23 +166,74 @@ Dynamic IP pooling without static egress proxies is strictly prohibited by banki
     db.add_all([el1, el2, el3, el4, el5])
 
     # Contradictions
+    scope_comp_1 = {
+        "subject": "Maximum P99 latency SLA",
+        "category": "performance",
+        "geographic_scope_a": "AWS us-east-1",
+        "geographic_scope_b": "AWS us-east-1",
+        "applicant_category_a": "Payment Ingestion Service",
+        "applicant_category_b": "Payment Ingestion Service",
+        "academic_year_a": "2024",
+        "academic_year_b": "2024",
+        "application_cycle_a": "Production Benchmark",
+        "application_cycle_b": "Production Benchmark",
+        "numerical_value_a": "15",
+        "numerical_value_b": "145",
+        "unit_a": "ms",
+        "unit_b": "ms",
+        "conditions_a": "SnapStart enabled with provisioned concurrency",
+        "conditions_b": "Burst traffic load exceeding 15,000 req/sec",
+        "scope_alignment": "aligned",
+        "divergence_reasons": []
+    }
     ct1 = Contradiction(
         session_id=session.id,
         requirement_id=r1.id,
         claim_a_id=cl1.id,
         claim_b_id=cl3.id,
         severity="high",
+        is_genuine=True,
+        conflict_type="numerical_threshold_divergence",
         conflicting_aspect="P99 Latency SLA under High Concurrency (15ms Vendor claim vs 145ms Benchmark empirical)",
-        synthesis_verdict="Vendor benchmark measures cold-start initialization in isolation, whereas the empirical load test surfaces account concurrency pool limits at 15k req/sec."
+        synthesis_verdict="Vendor benchmark measures cold-start initialization in isolation, whereas the empirical load test surfaces account concurrency pool limits at 15k req/sec.",
+        explanation="Both documents evaluate AWS serverless latency for payment ingestion in 2024, but report diametrically opposed P99 latencies (15ms vs 145ms).",
+        recommended_action="Execute dedicated shadow load testing on pre-production account to measure real P99 latency with SnapStart under 15k req/sec.",
+        scope_comparison_json=json.dumps(scope_comp_1)
     )
+
+    scope_comp_2 = {
+        "subject": "Net Operational Cost & TCO",
+        "category": "cost",
+        "geographic_scope_a": "Multi-AZ Enterprise",
+        "geographic_scope_b": "Multi-AZ Enterprise",
+        "applicant_category_a": "Cloud Migration",
+        "applicant_category_b": "Cloud Migration",
+        "academic_year_a": "2024",
+        "academic_year_b": "2024",
+        "application_cycle_a": "Enterprise Architecture",
+        "application_cycle_b": "Enterprise Architecture",
+        "numerical_value_a": "60",
+        "numerical_value_b": "14200",
+        "unit_a": "%",
+        "unit_b": "USD",
+        "conditions_a": "Idle EC2 compute elimination",
+        "conditions_b": "High-volume NAT gateway egress and CloudWatch logs",
+        "scope_alignment": "aligned",
+        "divergence_reasons": []
+    }
     ct2 = Contradiction(
         session_id=session.id,
         requirement_id=r2.id,
         claim_a_id=cl2.id,
         claim_b_id=cl4.id,
         severity="high",
+        is_genuine=True,
+        conflict_type="numerical_threshold_divergence",
         conflicting_aspect="Net Total Cost of Ownership (60% Savings vs $14,200/mo Auxiliary Transit/Log Fees)",
-        synthesis_verdict="The vendor calculation accounts only for idle compute hours and excludes egress data transfer and CloudWatch ingestion volume."
+        synthesis_verdict="The vendor calculation accounts only for idle compute hours and excludes egress data transfer and CloudWatch ingestion volume.",
+        explanation="Vendor whitepaper projects a 60% compute cost reduction, whereas empirical production audit proves auxiliary VPC NAT gateway and CloudWatch fees ($14,200/mo) nullify savings.",
+        recommended_action="Model complete VPC endpoint routing and CloudWatch log filter subscriptions to quantify true net monthly delta.",
+        scope_comparison_json=json.dumps(scope_comp_2)
     )
     db.add_all([ct1, ct2])
 

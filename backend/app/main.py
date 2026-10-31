@@ -43,6 +43,11 @@ def ensure_database_schema(eng):
             source_new_cols = [
                 ("domain", "VARCHAR(255)"),
                 ("last_modified_date", "DATETIME"),
+                ("effective_date", "DATETIME"),
+                ("expiry_date", "DATETIME"),
+                ("academic_year", "VARCHAR(50)"),
+                ("application_cycle", "VARCHAR(100)"),
+                ("access_date", "DATETIME"),
                 ("extraction_timestamp", "DATETIME"),
                 ("processing_status", "VARCHAR(50) DEFAULT 'processed'"),
                 ("error_details", "TEXT"),
@@ -69,6 +74,20 @@ def ensure_database_schema(eng):
             for col_name, col_type in claim_new_cols:
                 if col_name not in claim_cols:
                     cursor.execute(f"ALTER TABLE atomic_claims ADD COLUMN {col_name} {col_type}")
+
+            # Check and update contradictions table
+            cursor.execute("PRAGMA table_info(contradictions)")
+            contradiction_cols = {row[1] for row in cursor.fetchall()}
+            contradiction_new_cols = [
+                ("is_genuine", "BOOLEAN DEFAULT 1"),
+                ("conflict_type", "VARCHAR(100) DEFAULT 'direct_factual_clash'"),
+                ("scope_comparison_json", "TEXT"),
+                ("explanation", "TEXT"),
+                ("recommended_action", "TEXT"),
+            ]
+            for col_name, col_type in contradiction_new_cols:
+                if col_name not in contradiction_cols:
+                    cursor.execute(f"ALTER TABLE contradictions ADD COLUMN {col_name} {col_type}")
 
             conn.connection.commit()
     except Exception as e:
