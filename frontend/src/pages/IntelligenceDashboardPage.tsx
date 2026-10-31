@@ -22,6 +22,7 @@ import {
   FileText,
   Clock,
   ArrowRight,
+  RefreshCw,
 } from "lucide-react"
 import { researchService } from "@/services/researchService"
 import { findingService } from "@/services/findingService"
@@ -39,35 +40,48 @@ import {
 export const IntelligenceDashboardPage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
 
-  const { data: session } = useQuery({
+  const { data: session, isLoading, error } = useQuery({
     queryKey: ["session", id],
     queryFn: async () => {
-      try {
-        return await researchService.getSession(id!)
-      } catch {
-        return SAMPLE_SESSION_DETAIL
-      }
+      if (id === "demo") return SAMPLE_SESSION_DETAIL
+      return await researchService.getSession(id!)
     },
     enabled: !!id,
-    placeholderData: SAMPLE_SESSION_DETAIL,
   })
 
   const { data: conflicts } = useQuery({
     queryKey: ["conflicts", id],
     queryFn: async () => {
-      try {
-        return await findingService.getConflicts(id!)
-      } catch {
-        return SAMPLE_CONFLICTS
-      }
+      if (id === "demo") return SAMPLE_CONFLICTS
+      return await findingService.getConflicts(id!)
     },
     enabled: !!id,
-    placeholderData: SAMPLE_CONFLICTS,
   })
 
-  const currentSession = session || SAMPLE_SESSION_DETAIL
-  const currentConflicts = conflicts || SAMPLE_CONFLICTS
-  const tier = getReadinessTier(currentSession.readiness_score)
+  const currentSession = session || (id === "demo" ? SAMPLE_SESSION_DETAIL : null)
+  const currentConflicts = conflicts || (id === "demo" ? SAMPLE_CONFLICTS : [])
+  const tier = currentSession ? getReadinessTier(currentSession.readiness_score) : getReadinessTier(0)
+
+  if (isLoading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-16 text-center space-y-4">
+        <RefreshCw className="w-8 h-8 text-secondary animate-spin mx-auto" />
+        <p className="text-sm text-ink-secondary">Loading intelligence suite...</p>
+      </div>
+    )
+  }
+
+  if (error || !currentSession) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-16 text-center space-y-4">
+        <h2 className="text-xl font-bold text-ink">Investigation Not Found</h2>
+        <p className="text-xs text-ink-secondary">{error instanceof Error ? error.message : "The requested investigation could not be located."}</p>
+        <Link to="/dashboard">
+          <Button variant="secondary" size="sm">Back to Dashboard</Button>
+        </Link>
+      </div>
+    )
+  }
 
   // Radar Data for Recharts
   const radarData = [

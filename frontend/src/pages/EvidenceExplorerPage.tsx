@@ -23,14 +23,10 @@ export const EvidenceExplorerPage: React.FC = () => {
   const { data: graphData, isLoading: graphLoading } = useQuery({
     queryKey: ["graph", id],
     queryFn: async () => {
-      try {
-        return await findingService.getEvidenceGraph(id!)
-      } catch {
-        return SAMPLE_GRAPH_DATA
-      }
+      if (id === "demo") return SAMPLE_GRAPH_DATA
+      return await findingService.getEvidenceGraph(id!)
     },
     enabled: !!id,
-    placeholderData: SAMPLE_GRAPH_DATA,
   })
 
   const { data: matrixData, isLoading: matrixLoading } = useQuery({
@@ -45,7 +41,7 @@ export const EvidenceExplorerPage: React.FC = () => {
     enabled: !!id && activeTab === "claims",
   })
 
-  const currentGraph = graphData || SAMPLE_GRAPH_DATA
+  const currentGraph = graphData || (id === "demo" ? SAMPLE_GRAPH_DATA : { nodes: [], edges: [] })
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">

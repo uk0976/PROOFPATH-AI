@@ -21,18 +21,17 @@ import { SAMPLE_SESSION_SUMMARY } from "@/utils/sampleData"
 export const DashboardPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("")
 
-  const { data: sessions, isLoading } = useQuery({
+  const { data: sessions, isLoading, error } = useQuery({
     queryKey: ["sessions"],
     queryFn: async () => {
       try {
         const live = await researchService.listSessions()
-        return live.length > 0 ? live : [SAMPLE_SESSION_SUMMARY]
-      } catch {
-        // Fallback to clearly labelled sample data in offline demo mode
-        return [SAMPLE_SESSION_SUMMARY]
+        return live
+      } catch (e) {
+        console.warn("Could not fetch remote sessions, checking local cache", e)
+        return []
       }
     },
-    placeholderData: [SAMPLE_SESSION_SUMMARY],
   })
 
   const filteredSessions = sessions?.filter((s) =>

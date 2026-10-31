@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, status, Response
 from fastapi.responses import PlainTextResponse
 from sqlalchemy.orm import Session
 from app.database.session import get_db
@@ -120,3 +120,37 @@ def download_markdown_dossier(research_id: str, db: Session = Depends(get_db)):
         )
 
     raise NotFoundError("ResearchSession or Report", research_id)
+
+
+@router.get("/reports/{research_id}/pdf")
+def download_pdf_dossier(research_id: str, db: Session = Depends(get_db)):
+    session = db.query(ResearchSession).filter(ResearchSession.id == research_id).first()
+    if not session:
+        # Check if research_id is a ReportDossier id
+        report = db.query(ReportDossier).filter(ReportDossier.id == research_id).first()
+        if report:
+            session = db.query(ResearchSession).filter(ResearchSession.id == report.session_id).first()
+        if not session:
+            raise NotFoundError("ResearchSession or Report", research_id)
+
+    sources = db.query(Source).filter(Source.session_id == session.id).all()
+    reqs = db.query(Requirement).filter(Requirement.session_id == session.id).all()
+    conflicts = db.query(Contradiction).filter(Contradiction.session_id == session.id).all()
+    blindspots = db.query(BlindSpot).filter(BlindSpot.session_id == session.id).all()
+
+    pdf_bytes = ReportGenerator.generate_pdf(
+        session=session,
+        sources=sources,
+        requirements=reqs,
+        conflicts=conflicts,
+        blindspots=blindspots
+    )
+
+    safe_title = "".join(c for c in session.title if c.isalnum() or c in (" ", "_", "-")).rstrip()
+    filename = f"ProofPath_{safe_title[:20].strip().replace(' ', '_')}_Report.pdf"
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+    )

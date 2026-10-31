@@ -33,7 +33,7 @@ class PipelineOrchestrator:
         self.session_id = session_id
         self.vector_store = FAISSVectorStore()
 
-    async def _log_and_broadcast(self, stage: str, progress: int, message: str, data: Any = None):
+    async def _log_and_broadcast(self, stage: str, progress: int, message: str, data: Any = None, event_type: str = "progress"):
         logger.info(f"[{self.session_id}] ({progress}%) {stage}: {message}")
         log_entry = AuditLog(
             session_id=self.session_id,
@@ -50,7 +50,7 @@ class PipelineOrchestrator:
             progress=progress,
             message=message,
             data=data,
-            event_type="progress"
+            event_type=event_type
         )
 
     async def run(self) -> None:
@@ -63,19 +63,42 @@ class PipelineOrchestrator:
             session.status = "processing"
             self.db.commit()
 
-            # STAGE 1: Check sources & Index
-            await self._log_and_broadcast("INITIALIZING", 5, "Preparing investigation workspace and sources...")
+            # STAGE 1: Investigation Started & Source Extraction
+            await self._log_and_broadcast(
+                stage="INVESTIGATION_STARTED",
+                progress=5,
+                message="Investigation started: Preparing forensic workspace and evidence cache...",
+                event_type="investigation_started"
+            )
+
             sources = self.db.query(Source).filter(Source.session_id == self.session_id).all()
             if not sources:
-                await self._log_and_broadcast("ERROR", 100, "No sources found. Please upload at least one URL, PDF or text document.")
+                await self._log_and_broadcast(
+                    stage="INVESTIGATION_FAILED",
+                    progress=-1,
+                    message="Investigation failed: No sources found. Please attach at least one document or URL.",
+                    event_type="investigation_failed"
+                )
                 session.status = "failed"
                 self.db.commit()
                 return
 
+            await self._log_and_broadcast(
+                stage="SOURCE_EXTRACTION_STARTED",
+                progress=10,
+                message=f"Source extraction started: Reading {len(sources)} attached document(s)...",
+                event_type="source_extraction_started"
+            )
+
             # Collect all chunks from sources
             all_chunks = self.db.query(DocumentChunk).join(Source).filter(Source.session_id == self.session_id).all()
             if not all_chunks:
-                await self._log_and_broadcast("ERROR", 100, "No textual chunks could be extracted from provided sources.")
+                await self._log_and_broadcast(
+                    stage="INVESTIGATION_FAILED",
+                    progress=-1,
+                    message="Investigation failed: No textual chunks could be extracted from provided sources.",
+                    event_type="investigation_failed"
+                )
                 session.status = "failed"
                 self.db.commit()
                 return
@@ -86,14 +109,20 @@ class PipelineOrchestrator:
             self.vector_store.add_documents(chunk_texts, chunk_metas)
 
             await self._log_and_broadcast(
-                "INGESTION_COMPLETE",
-                20,
-                f"Successfully indexed {len(all_chunks)} chunks across {len(sources)} sources.",
-                {"sources_count": len(sources), "chunks_count": len(all_chunks)}
+                stage="SOURCE_EXTRACTION_COMPLETED",
+                progress=20,
+                message=f"Source extraction completed: Indexed {len(all_chunks)} chunks across {len(sources)} source(s).",
+                data={"sources_count": len(sources), "chunks_count": len(all_chunks)},
+                event_type="source_extraction_completed"
             )
 
             # STAGE 2: Research Planning & Goal Decomposition
-            await self._log_and_broadcast("RESEARCH_PLANNING", 30, "Decomposing research goal into MECE evaluation criteria...")
+            await self._log_and_broadcast(
+                stage="RESEARCH_PLANNING",
+                progress=35,
+                message="Decomposing research goal into MECE evaluation criteria...",
+                event_type="research_planning"
+            )
             planner = ResearchPlannerAgent()
             decomposed_reqs = await planner.decompose_goal(
                 goal=session.research_goal,
@@ -116,15 +145,13 @@ class PipelineOrchestrator:
                 created_reqs.append(req)
             self.db.commit()
 
-            await self._log_and_broadcast(
-                "PLANNING_COMPLETE",
-                45,
-                f"Established {len(created_reqs)} evaluation criteria across categories.",
-                {"requirements": [r.requirement_text for r in created_reqs]}
-            )
-
             # STAGE 3: Atomic Claim Extraction
-            await self._log_and_broadcast("CLAIM_EXTRACTION", 55, "Extracting atomic claims and verifying quotes against source text...")
+            await self._log_and_broadcast(
+                stage="CLAIM_EXTRACTION",
+                progress=45,
+                message="Extracting atomic claims and verifying quotes against source text...",
+                event_type="claim_extraction_started"
+            )
             claim_agent = ClaimExtractorAgent()
             created_claims: List[AtomicClaim] = []
 
@@ -146,14 +173,20 @@ class PipelineOrchestrator:
 
             self.db.commit()
             await self._log_and_broadcast(
-                "CLAIMS_EXTRACTED",
-                65,
-                f"Extracted {len(created_claims)} verifiable atomic claims.",
-                {"claims_count": len(created_claims)}
+                stage="CLAIM_EXTRACTION_COMPLETED",
+                progress=60,
+                message=f"Claim extraction completed: Grounded and verified {len(created_claims)} atomic factual assertions.",
+                data={"claims_count": len(created_claims)},
+                event_type="claim_extraction_completed"
             )
 
-            # STAGE 4: Semantic Evidence Mapping
-            await self._log_and_broadcast("EVIDENCE_MAPPING", 72, "Mapping atomic claims to evaluation criteria...")
+            # STAGE 4: Semantic Evidence Retrieval & Mapping
+            await self._log_and_broadcast(
+                stage="EVIDENCE_RETRIEVAL",
+                progress=68,
+                message="Evidence retrieval: Mapping atomic claims to evaluation criteria via semantic similarity...",
+                event_type="evidence_retrieval_started"
+            )
             evaluator = EvidenceEvaluatorAgent()
             claims_dict_list = [
                 {
@@ -204,8 +237,27 @@ class PipelineOrchestrator:
 
             self.db.commit()
 
-            # STAGE 5: Contradiction & Conflict Analysis
-            await self._log_and_broadcast("CONTRADICTION_ANALYSIS", 80, "Cross-examining claims for contradictions and metric discrepancies...")
+            await self._log_and_broadcast(
+                stage="EVIDENCE_RETRIEVAL_COMPLETED",
+                progress=74,
+                message=f"Evidence retrieval completed: Mapped evidence across {len(created_reqs)} criteria.",
+                event_type="evidence_retrieval_completed"
+            )
+
+            # STAGE 5: Gap Analysis
+            gap_agent = GapDetectorAgent()
+            req_dicts = [{"id": r.id, "requirement_text": r.requirement_text, "category": r.category} for r in created_reqs]
+            detected_gaps = await gap_agent.detect_gaps(req_dicts, evidence_counts)
+
+            await self._log_and_broadcast(
+                stage="GAP_ANALYSIS_COMPLETED",
+                progress=80,
+                message=f"Gap analysis completed: Identified {len(detected_gaps)} unaddressed or partially backed dimensions.",
+                data={"gaps_count": len(detected_gaps)},
+                event_type="gap_analysis_completed"
+            )
+
+            # STAGE 6: Contradiction & Conflict Analysis
             conflict_agent = ContradictionAnalyzerAgent()
             all_conflicts = []
 
@@ -232,14 +284,14 @@ class PipelineOrchestrator:
 
             self.db.commit()
             await self._log_and_broadcast(
-                "CONFLICTS_AUDITED",
-                86,
-                f"Audit identified {len(all_conflicts)} cross-source contradictions.",
-                {"conflicts_count": len(all_conflicts)}
+                stage="CONTRADICTION_ANALYSIS_COMPLETED",
+                progress=86,
+                message=f"Contradiction analysis completed: Uncovered {len(all_conflicts)} cross-source contradiction(s).",
+                data={"conflicts_count": len(all_conflicts)},
+                event_type="contradiction_analysis_completed"
             )
 
-            # STAGE 6: BlindSpot Discovery & Gaps
-            await self._log_and_broadcast("BLINDSPOT_DISCOVERY", 92, "Formulating unasked questions and counter-factual risk vectors...")
+            # STAGE 7: BlindSpot Discovery
             blindspot_agent = BlindSpotDiscoveryAgent()
             discovered_blindspots = await blindspot_agent.discover_blindspots(
                 goal=session.research_goal,
@@ -259,9 +311,22 @@ class PipelineOrchestrator:
                 self.db.add(spot)
 
             self.db.commit()
+            await self._log_and_broadcast(
+                stage="BLINDSPOT_ANALYSIS_COMPLETED",
+                progress=92,
+                message=f"BlindSpot analysis completed: Formulated {len(discovered_blindspots)} high-impact unasked questions.",
+                data={"blindspots_count": len(discovered_blindspots)},
+                event_type="blindspot_analysis_completed"
+            )
 
-            # STAGE 7: Decision-Readiness Scoring
-            await self._log_and_broadcast("SCORING", 96, "Calculating deterministic 4-factor Decision-Readiness Index...")
+            # STAGE 8: Scoring & Report Preparation
+            await self._log_and_broadcast(
+                stage="REPORT_PREPARATION",
+                progress=96,
+                message="Calculating deterministic 4-factor Decision-Readiness Index and compiling verdict...",
+                event_type="report_preparation_started"
+            )
+
             score_results = DecisionReadinessScorer.calculate_readiness(
                 requirements=created_reqs,
                 contradictions=all_conflicts,
@@ -281,18 +346,24 @@ class PipelineOrchestrator:
             self.db.commit()
 
             await self._log_and_broadcast(
-                "COMPLETE",
-                100,
-                f"Investigation complete. Decision Readiness Index: {session.readiness_score}%. Verdict: {tier}",
-                {
+                stage="REPORT_PREPARATION_COMPLETED",
+                progress=100,
+                message=f"Report preparation completed. Decision Readiness Index: {session.readiness_score}%. Verdict: {tier}",
+                data={
                     "readiness_score": session.readiness_score,
                     "tier": tier,
                     "recommendation": recommendation
-                }
+                },
+                event_type="report_preparation_completed"
             )
 
         except Exception as e:
             logger.exception(f"Pipeline failed for session {self.session_id}: {e}")
             session.status = "failed"
             self.db.commit()
-            await self._log_and_broadcast("ERROR", -1, f"Investigation encountered an error: {str(e)}")
+            await self._log_and_broadcast(
+                stage="INVESTIGATION_FAILED",
+                progress=-1,
+                message=f"Investigation failed: {str(e)}",
+                event_type="investigation_failed"
+            )

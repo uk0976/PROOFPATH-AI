@@ -97,7 +97,7 @@ export const ResearchPage: React.FC = () => {
       await researchService.startInvestigation(session.id)
 
       // 4. Navigate to live investigation progress page
-      navigate(`/investigation/${session.id}`)
+      navigate(`/investigation/${session.id}/progress`)
     } catch (err: any) {
       setError(err.message || "Failed to initiate investigation.")
       setIsSubmitting(false)

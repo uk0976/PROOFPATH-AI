@@ -67,4 +67,11 @@ export const reportService = {
     })
     return res.data
   },
+
+  async downloadPdfReport(sessionId: string): Promise<Blob> {
+    const res = await apiClient.get(`/reports/${sessionId}/pdf`, {
+      responseType: "blob",
+    })
+    return res.data
+  },
 }

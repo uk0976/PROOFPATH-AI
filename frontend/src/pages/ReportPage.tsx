@@ -21,6 +21,7 @@ import { formatDate, getReadinessTier } from "@/utils/formatters"
 
 export const ReportPage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
+  const [isDownloadingPdf, setIsDownloadingPdf] = React.useState(false)
 
   const { data: session, isLoading } = useQuery({
     queryKey: ["session", id],
@@ -69,6 +70,26 @@ export const ReportPage: React.FC = () => {
     }
   }
 
+  const handleDownloadPdf = async () => {
+    if (!id) return
+    try {
+      setIsDownloadingPdf(true)
+      const blob = await reportService.downloadPdfReport(id)
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `ProofPath_Report_${id.slice(0, 8)}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+    } catch (err) {
+      console.error("Failed to download PDF report", err)
+    } finally {
+      setIsDownloadingPdf(false)
+    }
+  }
+
   if (isLoading || !session) {
     return <div className="p-12 text-center text-xs text-slate-500">Generating report...</div>
   }
@@ -91,11 +112,15 @@ export const ReportPage: React.FC = () => {
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => window.print()} className="gap-1.5">
             <Printer className="w-3.5 h-3.5" />
-            <span>Print / Save PDF</span>
+            <span>Print</span>
           </Button>
-          <Button variant="primary" size="sm" onClick={handleDownloadMarkdown} className="gap-1.5">
+          <Button variant="outline" size="sm" onClick={handleDownloadMarkdown} className="gap-1.5">
             <Download className="w-3.5 h-3.5" />
-            <span>Download Markdown</span>
+            <span>Markdown</span>
+          </Button>
+          <Button variant="primary" size="sm" onClick={handleDownloadPdf} disabled={isDownloadingPdf} className="gap-1.5">
+            <Download className="w-3.5 h-3.5" />
+            <span>{isDownloadingPdf ? "Generating PDF..." : "Download PDF"}</span>
           </Button>
         </div>
       </div>

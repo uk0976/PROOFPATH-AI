@@ -16,6 +16,7 @@ import {
 } from "lucide-react"
 import { researchService } from "@/services/researchService"
 import { findingService } from "@/services/findingService"
+import { API_BASE_URL } from "@/services/api"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
@@ -31,43 +32,35 @@ export const InvestigationPage: React.FC = () => {
   const [liveProgress, setLiveProgress] = useState<SSEProgressPayload | null>(null)
   const [eventLogs, setEventLogs] = useState<string[]>([])
 
-  // Query session data with graceful fallback
-  const { data: session, isLoading } = useQuery({
+  // Query session data directly from backend
+  const { data: session, isLoading, error } = useQuery({
     queryKey: ["session", id],
     queryFn: async () => {
-      try {
-        return await researchService.getSession(id!)
-      } catch {
-        return SAMPLE_SESSION_DETAIL
-      }
+      if (id === "demo") return SAMPLE_SESSION_DETAIL
+      return await researchService.getSession(id!)
     },
     enabled: !!id,
-    placeholderData: SAMPLE_SESSION_DETAIL,
   })
 
-  // Query contradictions with graceful fallback
+  // Query contradictions directly from backend
   const { data: conflicts } = useQuery({
     queryKey: ["conflicts", id],
     queryFn: async () => {
-      try {
-        return await findingService.getConflicts(id!)
-      } catch {
-        return SAMPLE_CONFLICTS
-      }
+      if (id === "demo") return SAMPLE_CONFLICTS
+      return await findingService.getConflicts(id!)
     },
     enabled: !!id,
-    placeholderData: SAMPLE_CONFLICTS,
   })
 
-  const currentSession = session || SAMPLE_SESSION_DETAIL
-  const currentConflicts = conflicts || SAMPLE_CONFLICTS
-  const tier = getReadinessTier(currentSession.readiness_score)
+  const currentSession = session || (id === "demo" ? SAMPLE_SESSION_DETAIL : null)
+  const currentConflicts = conflicts || (id === "demo" ? SAMPLE_CONFLICTS : [])
+  const tier = currentSession ? getReadinessTier(currentSession.readiness_score) : getReadinessTier(0)
 
   // SSE Listener for real-time progress updates
   useEffect(() => {
-    if (!id || currentSession.status !== "processing") return
+    if (!id || !currentSession || currentSession.status !== "processing") return
 
-    const streamUrl = `/api/v1/research/${id}/events`
+    const streamUrl = `${API_BASE_URL}/research/${id}/progress`
     const eventSource = new EventSource(streamUrl)
 
     eventSource.addEventListener("progress", (event) => {
@@ -98,7 +91,31 @@ export const InvestigationPage: React.FC = () => {
     return () => {
       eventSource.close()
     }
-  }, [id, currentSession.status, queryClient])
+  }, [id, currentSession?.status, queryClient])
+
+  if (isLoading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center space-y-4">
+        <RefreshCw className="w-8 h-8 text-secondary animate-spin mx-auto" />
+        <p className="text-sm text-ink-secondary">Loading investigation dossier #{id?.slice(0, 8)}...</p>
+      </div>
+    )
+  }
+
+  if (error || !currentSession) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-16 text-center space-y-4">
+        <AlertTriangle className="w-10 h-10 text-rose-500 mx-auto" />
+        <h2 className="text-xl font-bold text-ink">Investigation Dossier Not Found</h2>
+        <p className="text-xs text-ink-secondary">
+          {error instanceof Error ? error.message : "The requested investigation session could not be located."}
+        </p>
+        <Link to="/dashboard">
+          <Button variant="secondary" size="sm">Back to Dashboard</Button>
+        </Link>
+      </div>
+    )
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
@@ -157,11 +174,11 @@ export const InvestigationPage: React.FC = () => {
               </p>
             </div>
             <span className="text-lg font-bold text-ink">
-              {liveProgress?.progress || 15}%
+              {liveProgress?.progress || 0}%
             </span>
           </div>
 
-          <Progress value={liveProgress?.progress || 15} />
+          <Progress value={liveProgress?.progress || 0} />
 
           {eventLogs.length > 0 && (
             <div className="bg-background rounded-lg p-3 border border-border font-mono text-[11px] text-ink-secondary space-y-1 max-h-36 overflow-y-auto">

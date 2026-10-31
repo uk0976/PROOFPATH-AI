@@ -210,3 +210,9 @@ def test_reports_endpoints():
     md_res = client.get(f"/api/v1/reports/{session_id}/markdown")
     assert md_res.status_code == 200
     assert "PROOFPATH AI — FORENSIC INVESTIGATION REPORT" in md_res.text
+
+    # Direct PDF Dossier
+    pdf_res = client.get(f"/api/v1/reports/{session_id}/pdf")
+    assert pdf_res.status_code == 200
+    assert pdf_res.headers["content-type"] == "application/pdf"
+    assert len(pdf_res.content) > 1000

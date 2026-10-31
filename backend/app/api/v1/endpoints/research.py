@@ -119,6 +119,7 @@ async def start_research(
 
 
 @router.get("/research/{research_id}/progress")
+@router.get("/research/{research_id}/events")
 async def get_research_progress(research_id: str, db: Session = Depends(get_db)):
     session = db.query(ResearchSession).filter(ResearchSession.id == research_id).first()
     if not session:
@@ -133,8 +134,18 @@ async def get_research_progress(research_id: str, db: Session = Depends(get_db))
             while True:
                 try:
                     event_type, payload = await asyncio.wait_for(queue.get(), timeout=25.0)
+                    # 1. Emit specific event name
                     yield f"event: {event_type}\ndata: {json.dumps(payload)}\n\n"
-                    if payload.get("stage") in ["COMPLETE", "ERROR"]:
+                    # 2. Also emit generic progress event if distinct
+                    if event_type != "progress":
+                        yield f"event: progress\ndata: {json.dumps(payload)}\n\n"
+
+                    # 3. Handle terminal events
+                    if payload.get("stage") in ["REPORT_PREPARATION_COMPLETED", "COMPLETE"]:
+                        yield f"event: complete\ndata: {json.dumps(payload)}\n\n"
+                        break
+                    elif payload.get("stage") in ["INVESTIGATION_FAILED", "ERROR"]:
+                        yield f"event: error\ndata: {json.dumps(payload)}\n\n"
                         break
                 except asyncio.TimeoutError:
                     yield f": keepalive\n\n"
