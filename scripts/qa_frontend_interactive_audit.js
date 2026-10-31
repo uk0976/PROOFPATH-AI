@@ -86,7 +86,7 @@ async function runQA() {
     console.log("[QA SETUP] Chrome debugging instance connected.");
 
     // Create a tab pointing to app
-    const newTabRes = await fetch("http://127.0.0.1:9222/json/new?http://localhost:5173/", { method: "PUT" });
+    const newTabRes = await fetch("http://127.0.0.1:9222/json/new?http://localhost:5173/?nosplash=true", { method: "PUT" });
     const tab = await newTabRes.json();
     const cdp = new CDPClient(tab.webSocketDebuggerUrl);
     await cdp.connect();
@@ -114,10 +114,10 @@ async function runQA() {
     // -------------------------------------------------------------------------
     console.log("\n[1/7] Testing Navigation Items & Route Mounting...");
     const routesToTest = [
-      { path: "/", titleCheck: "PROOFPATH AI" },
+      { path: "/?nosplash=true", titleCheck: "PROOFPATH" },
       { path: "/dashboard", titleCheck: "Research Investigations" },
       { path: "/research", titleCheck: "Initiate Forensic Information Audit" },
-      { path: "/demo", titleCheck: "Scholarship" },
+      { path: "/demo", titleCheck: "DEMO MODE" },
       { path: "/settings", titleCheck: "Platform Settings & API Keys" },
     ];
 

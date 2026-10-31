@@ -22,6 +22,7 @@ import {
   Sun,
   Moon,
 } from "lucide-react"
+import { Logo, LogoIcon } from "@/components/brand/Logo"
 import { useAppStore } from "@/store/useAppStore"
 import { DEMO_SESSION_ID } from "@/utils/sampleData"
 
@@ -81,17 +82,11 @@ export const Sidebar: React.FC = () => {
             onClick={() => isMobileView && closeMobileSidebar()}
             className="flex items-center space-x-2.5 overflow-hidden"
           >
-            <div className="w-7 h-7 rounded-md bg-primary flex items-center justify-center text-white shrink-0 shadow-subtle">
-              <ShieldCheck className="w-4 h-4 text-white" />
-            </div>
-            {(sidebarOpen || isMobileView) && (
-              <div className="flex flex-col truncate">
-                <span className="font-semibold text-ink text-xs tracking-tight flex items-center gap-1">
-                  PROOFPATH <span className="text-secondary font-bold text-[9px] uppercase">AI</span>
-                </span>
-                <span className="text-[10px] text-ink-secondary truncate">
-                  Forensic Intelligence
-                </span>
+            {sidebarOpen || isMobileView ? (
+              <Logo size="md" />
+            ) : (
+              <div className="w-8 h-8 rounded-lg bg-primary/10 dark:bg-white/5 flex items-center justify-center shrink-0">
+                <LogoIcon size={22} />
               </div>
             )}
           </NavLink>

@@ -1,8 +1,9 @@
 import React from "react"
 import { Link, useLocation } from "react-router-dom"
-import { ShieldCheck, Plus, Sparkles, Menu, Sun, Moon } from "lucide-react"
+import { Plus, Sparkles, Menu, Sun, Moon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Logo } from "@/components/brand/Logo"
 import { useAppStore } from "@/store/useAppStore"
 
 export const Navbar: React.FC = () => {
@@ -30,13 +31,8 @@ export const Navbar: React.FC = () => {
             <Menu className="w-5 h-5" />
           </button>
 
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-7 h-7 rounded-md bg-primary flex items-center justify-center text-white shrink-0 shadow-subtle">
-              <ShieldCheck className="w-4 h-4 text-white" />
-            </div>
-            <span className="font-semibold text-ink text-sm tracking-tight flex items-center gap-1.5">
-              PROOFPATH <span className="text-secondary font-bold text-[10px] uppercase">AI</span>
-            </span>
+          <Link to="/" className="flex items-center">
+            <Logo size="md" />
           </Link>
 
           <div className="hidden md:flex items-center space-x-2 border-l border-border pl-3 ml-1">

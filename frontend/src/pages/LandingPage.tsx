@@ -16,12 +16,19 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { LogoIcon } from "@/components/brand/Logo"
 
 export const LandingPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-background text-ink flex flex-col justify-between">
       {/* Hero Section */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-24 pb-14 text-center space-y-7">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 sm:pt-20 pb-14 text-center space-y-7">
+        <div className="flex justify-center mb-1">
+          <div className="p-3.5 rounded-2xl bg-surface border border-border shadow-elevated transition-transform hover:scale-105 duration-300">
+            <LogoIcon size={52} className="filter drop-shadow-[0_4px_16px_rgba(37,99,235,0.3)]" />
+          </div>
+        </div>
+
         <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-border bg-surface shadow-subtle">
           <span className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
           <span className="text-[11px] font-semibold tracking-wider text-ink-secondary uppercase">
