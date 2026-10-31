@@ -11,6 +11,9 @@ from app.models import (
     Contradiction,
     BlindSpot,
     ReportDossier,
+    GapFinding,
+    VerificationTask,
+    AtomicClaim,
 )
 from app.schemas.reports import ReportGenerateRequest, ReportGenerateResponse
 from app.reports.generator import ReportGenerator
@@ -90,6 +93,8 @@ def download_report(report_id: str, db: Session = Depends(get_db)):
 def download_markdown_dossier(research_id: str, db: Session = Depends(get_db)):
     # Check if research_id matches a ResearchSession
     session = db.query(ResearchSession).filter(ResearchSession.id == research_id).first()
+    if not session and research_id == "demo":
+        session = db.query(ResearchSession).first()
     if session:
         sources = db.query(Source).filter(Source.session_id == research_id).all()
         reqs = db.query(Requirement).filter(Requirement.session_id == research_id).all()
@@ -130,6 +135,8 @@ def download_pdf_dossier(research_id: str, db: Session = Depends(get_db)):
         report = db.query(ReportDossier).filter(ReportDossier.id == research_id).first()
         if report:
             session = db.query(ResearchSession).filter(ResearchSession.id == report.session_id).first()
+        elif research_id == "demo":
+            session = db.query(ResearchSession).first()
         if not session:
             raise NotFoundError("ResearchSession or Report", research_id)
 
@@ -137,13 +144,21 @@ def download_pdf_dossier(research_id: str, db: Session = Depends(get_db)):
     reqs = db.query(Requirement).filter(Requirement.session_id == session.id).all()
     conflicts = db.query(Contradiction).filter(Contradiction.session_id == session.id).all()
     blindspots = db.query(BlindSpot).filter(BlindSpot.session_id == session.id).all()
+    findings = db.query(GapFinding).filter(GapFinding.session_id == session.id).all()
+    tasks = db.query(VerificationTask).filter(VerificationTask.session_id == session.id).all()
+    
+    source_ids = [s.id for s in sources]
+    claims = db.query(AtomicClaim).filter(AtomicClaim.source_id.in_(source_ids)).all() if source_ids else []
 
     pdf_bytes = ReportGenerator.generate_pdf(
         session=session,
         sources=sources,
         requirements=reqs,
         conflicts=conflicts,
-        blindspots=blindspots
+        blindspots=blindspots,
+        findings=findings,
+        claims=claims,
+        verification_tasks=tasks,
     )
 
     safe_title = "".join(c for c in session.title if c.isalnum() or c in (" ", "_", "-")).rstrip()

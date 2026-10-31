@@ -1,4 +1,4 @@
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from datetime import datetime, timezone
 
 
@@ -115,123 +115,19 @@ class ReportGenerator:
         sources: List[Any],
         requirements: List[Any],
         conflicts: List[Any],
-        blindspots: List[Any]
+        blindspots: List[Any],
+        findings: Optional[List[Any]] = None,
+        claims: Optional[List[Any]] = None,
+        verification_tasks: Optional[List[Any]] = None,
     ) -> bytes:
-        import pymupdf
-        doc = pymupdf.open()
-
-        # Helper to create a new page with header
-        def add_page(page_num: int):
-            p = doc.new_page(width=595, height=842) # standard A4
-            # Top Banner
-            p.draw_rect(pymupdf.Rect(0, 0, 595, 54), color=None, fill=(0.09, 0.17, 0.27))
-            p.insert_text(pymupdf.Point(36, 32), "PROOFPATH AI  |  FORENSIC DOSSIER", fontsize=14, color=(1, 1, 1), fontname="helv")
-            p.insert_text(pymupdf.Point(440, 32), f"Page {page_num}", fontsize=10, color=(0.8, 0.85, 0.9), fontname="helv")
-            # Bottom Footer
-            p.draw_line(pymupdf.Point(36, 810), pymupdf.Point(559, 810), color=(0.85, 0.88, 0.92))
-            p.insert_text(pymupdf.Point(36, 824), "CONFIDENTIAL & PRIVILEGED — Verbatim Substring Grounding — PROOFPATH AI", fontsize=8, color=(0.5, 0.55, 0.6), fontname="helv")
-            return p
-
-        page_num = 1
-        page = add_page(page_num)
-        y = 80
-
-        def check_y(needed: float = 30):
-            nonlocal page, page_num, y
-            if y + needed > 790:
-                page_num += 1
-                page = add_page(page_num)
-                y = 75
-
-        # Title Block
-        page.insert_text(pymupdf.Point(36, y), session.title[:65], fontsize=16, color=(0.09, 0.17, 0.27), fontname="helv")
-        y += 20
-        page.insert_text(pymupdf.Point(36, y), f"Research Goal: {session.research_goal[:85]}", fontsize=9, color=(0.4, 0.45, 0.5), fontname="helv")
-        y += 16
-        decision_txt = f"Target Decision: {session.target_decision or 'Strategic Technical Decision'}"
-        page.insert_text(pymupdf.Point(36, y), decision_txt[:85], fontsize=9, color=(0.4, 0.45, 0.5), fontname="helv")
-        y += 24
-
-        # Decision Readiness Score Box
-        page.draw_rect(pymupdf.Rect(36, y, 559, y + 60), color=(0.85, 0.88, 0.92), fill=(0.97, 0.98, 0.99))
-        page.insert_text(pymupdf.Point(48, y + 22), "EXPLAINABLE DECISION READINESS INDEX (DRI)", fontsize=8, color=(0.4, 0.45, 0.5), fontname="helv")
-        score_val = f"{session.readiness_score:.1f}%"
-        page.insert_text(pymupdf.Point(48, y + 48), score_val, fontsize=20, color=(0.09, 0.17, 0.27), fontname="helv")
-
-        verdict_summary = (session.executive_verdict or "Pending Human Audit")[:60]
-        page.insert_text(pymupdf.Point(140, y + 44), f"Verdict: {verdict_summary}", fontsize=10, color=(0.14, 0.53, 0.36), fontname="helv")
-        y += 80
-
-        # Sub-scores
-        page.insert_text(
-            pymupdf.Point(48, y),
-            f"Coverage: {session.coverage_score:.1f}%   |   Consistency: {session.consistency_score:.1f}%   |   Freshness: {session.freshness_score:.1f}%   |   Quote Verification: {session.verification_score:.1f}%",
-            fontsize=9,
-            color=(0.2, 0.25, 0.3),
-            fontname="helv"
+        from app.reports.pdf_generator import PdfReportGenerator
+        return PdfReportGenerator.generate_pdf(
+            session=session,
+            sources=sources,
+            requirements=requirements,
+            conflicts=conflicts,
+            blindspots=blindspots,
+            findings=findings,
+            claims=claims,
+            verification_tasks=verification_tasks,
         )
-        y += 24
-
-        # Section 2: Sources
-        check_y(40)
-        page.draw_line(pymupdf.Point(36, y), pymupdf.Point(559, y), color=(0.85, 0.88, 0.92))
-        y += 16
-        page.insert_text(pymupdf.Point(36, y), f"INGESTED EVIDENCE SOURCES ({len(sources)})", fontsize=11, color=(0.09, 0.17, 0.27), fontname="helv")
-        y += 18
-
-        for idx, s in enumerate(sources, 1):
-            check_y(18)
-            pub = s.publication_date.strftime("%Y-%m-%d") if s.publication_date else "Unknown Date"
-            src_line = f"{idx}. [{s.source_type.upper()}] {s.title[:55]} (Published: {pub}, Chunks: {len(s.chunks)})"
-            page.insert_text(pymupdf.Point(42, y), src_line, fontsize=8.5, color=(0.2, 0.25, 0.3), fontname="helv")
-            y += 14
-
-        # Section 3: Cross-Source Contradictions
-        check_y(50)
-        y += 10
-        page.draw_line(pymupdf.Point(36, y), pymupdf.Point(559, y), color=(0.85, 0.88, 0.92))
-        y += 16
-        page.insert_text(pymupdf.Point(36, y), f"CROSS-SOURCE CONTRADICTIONS & METRIC CONFLICTS ({len(conflicts)})", fontsize=11, color=(0.78, 0.33, 0.33), fontname="helv")
-        y += 18
-
-        if not conflicts:
-            check_y(20)
-            page.insert_text(pymupdf.Point(42, y), "No conflicting claims detected across ingested documents.", fontsize=8.5, color=(0.5, 0.55, 0.6), fontname="helv")
-            y += 16
-        else:
-            for idx, c in enumerate(conflicts, 1):
-                check_y(60)
-                page.insert_text(pymupdf.Point(42, y), f"Conflict #{idx}: [{c.severity.upper()} SEVERITY] {c.conflicting_aspect[:70]}", fontsize=9, color=(0.78, 0.33, 0.33), fontname="helv")
-                y += 14
-
-                claim_a = getattr(c, "claim_a", None)
-                claim_b = getattr(c, "claim_b", None)
-                if claim_a:
-                    quote_a = f"Source A: \"{claim_a.exact_quote[:80]}\""
-                    page.insert_text(pymupdf.Point(52, y), quote_a, fontsize=8, color=(0.3, 0.35, 0.4), fontname="helv")
-                    y += 12
-                if claim_b:
-                    quote_b = f"Source B: \"{claim_b.exact_quote[:80]}\""
-                    page.insert_text(pymupdf.Point(52, y), quote_b, fontsize=8, color=(0.3, 0.35, 0.4), fontname="helv")
-                    y += 12
-
-                verdict_line = f"Verdict: {c.synthesis_verdict[:90]}"
-                page.insert_text(pymupdf.Point(52, y), verdict_line, fontsize=8, color=(0.15, 0.4, 0.25), fontname="helv")
-                y += 18
-
-        # Section 4: BlindSpots
-        check_y(50)
-        y += 10
-        page.draw_line(pymupdf.Point(36, y), pymupdf.Point(559, y), color=(0.85, 0.88, 0.92))
-        y += 16
-        page.insert_text(pymupdf.Point(36, y), f"BLINDSPOT DISCOVERY — UNASKED QUESTIONS & HIDDEN RISKS ({len(blindspots)})", fontsize=11, color=(0.09, 0.17, 0.27), fontname="helv")
-        y += 18
-
-        for idx, b in enumerate(blindspots, 1):
-            check_y(32)
-            page.insert_text(pymupdf.Point(42, y), f"{idx}. {b.question[:85]}", fontsize=8.5, color=(0.15, 0.2, 0.3), fontname="helv")
-            y += 12
-            page.insert_text(pymupdf.Point(54, y), f"Risk Level: {b.risk_level.upper()} | Rationale: {b.rationale[:90]}", fontsize=8, color=(0.45, 0.5, 0.55), fontname="helv")
-            y += 16
-
-        return doc.tobytes()

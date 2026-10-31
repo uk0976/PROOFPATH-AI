@@ -767,32 +767,6 @@ class PipelineOrchestrator:
         conflicts: List[Contradiction],
         blindspots: List[BlindSpot]
     ) -> List[VerificationTask]:
-        """Stage 15: Generates verification checklist tasks for arbitration."""
-        # Clear existing verification tasks for idempotency
-        self.db.query(VerificationTask).filter(VerificationTask.session_id == self.session_id).delete()
-        tasks = []
-
-        for c in conflicts:
-            t = VerificationTask(
-                session_id=self.session_id,
-                task_type="contradiction",
-                title=f"Arbitrate conflict: {c.conflicting_aspect}",
-                description="Evaluate competing source claims and determine authoritative specification.",
-                is_completed=False
-            )
-            self.db.add(t)
-            tasks.append(t)
-
-        for b in blindspots:
-            t = VerificationTask(
-                session_id=self.session_id,
-                task_type="blindspot",
-                title=f"Address omitted risk: {b.question}",
-                description=b.rationale,
-                is_completed=b.is_resolved
-            )
-            self.db.add(t)
-            tasks.append(t)
-
-        self.db.commit()
-        return tasks
+        """Stage 15: Generates verification checklist tasks for arbitration using VerificationPlannerEngine."""
+        from app.intelligence.verification_engine import VerificationPlannerEngine
+        return VerificationPlannerEngine.generate_tasks_for_session(self.db, self.session_id, persist=True)

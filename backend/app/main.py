@@ -110,6 +110,22 @@ def ensure_database_schema(eng):
                 if col_name not in blindspot_cols:
                     cursor.execute(f"ALTER TABLE blindspots ADD COLUMN {col_name} {col_type}")
 
+            # Check and update verification_tasks table
+            cursor.execute("PRAGMA table_info(verification_tasks)")
+            verification_cols = {row[1] for row in cursor.fetchall()}
+            verification_new_cols = [
+                ("priority", "VARCHAR(20) DEFAULT 'high'"),
+                ("related_requirement_id", "VARCHAR(36)"),
+                ("related_requirement_text", "TEXT"),
+                ("related_finding_id", "VARCHAR(36)"),
+                ("evidence_references_json", "TEXT"),
+                ("recommended_action", "TEXT"),
+                ("is_custom", "BOOLEAN DEFAULT 0"),
+            ]
+            for col_name, col_type in verification_new_cols:
+                if col_name not in verification_cols:
+                    cursor.execute(f"ALTER TABLE verification_tasks ADD COLUMN {col_name} {col_type}")
+
             conn.connection.commit()
     except Exception as e:
         logger.warning(f"Schema migration check: {e}")
